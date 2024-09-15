@@ -1,20 +1,7 @@
 import moment from "moment-timezone";
-import EventRepository from "../events/repository.js";
 
 
-export class ServiceError extends Error {
-    constructor(...args) {
-        super(...args);
-        this.status = 500;
-    }
-}
-
-export class ValidationError extends ServiceError {
-    constructor(...args) {
-        super(...args);
-        this.status = 422;
-    }
-}
+export class ServiceError extends Error {}
 
 export class DatesService {
 

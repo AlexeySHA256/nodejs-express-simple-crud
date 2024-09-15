@@ -1,5 +1,5 @@
-import { matchedData, query, validationResult } from "express-validator";
-import {DatesService, ValidationError, ServiceError } from "./service.js";
+import { query, validationResult } from "express-validator";
+import {DatesService, ServiceError } from "./service.js";
 import moment from "moment-timezone";
 
 class DatesHandlers {

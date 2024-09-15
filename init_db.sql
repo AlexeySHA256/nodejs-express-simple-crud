@@ -2,9 +2,10 @@
 
 CREATE TABLE IF NOT EXISTS events (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
     date TIMESTAMP NOT NULL,
-    description TEXT
+    description TEXT DEFAULT '',
+    UNIQUE(name, date)
 );
 
 CREATE INDEX IF NOT EXISTS events_name_idx ON events(name);

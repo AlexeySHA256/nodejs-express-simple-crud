@@ -9,7 +9,7 @@ services:
     container_name: dates_api
     build: .
     ports:
-      - "8000:8000"
+      - "3000:3000"
     depends_on:
       - postgres 
     env_file:
