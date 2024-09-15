@@ -1,0 +1,36 @@
+
+
+volumes:
+  pgdata:
+
+services:
+
+  app:
+    container_name: dates_api
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres 
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+
+  postgres:
+    container_name: dates_db
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    
