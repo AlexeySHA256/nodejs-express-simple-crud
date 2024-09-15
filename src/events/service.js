@@ -5,10 +5,22 @@ export class EventsService {
       this.repo = new EventRepository();
     }
     createEvent(eventData) {
-      return this.repo.createEvent(eventData).then(result => result)
+      return this.repo.createEvent(eventData)
     }
 
-    getEventByDate(date) {}
+    getEvents(date) {
+      let events;
+      if (date) {
+        events = this.repo.getEventByDate(date)
+      } else {
+        events = this.repo.listEvents()
+      }
+      return events.then(events => {
+        console.log(events);
+        return {events, date}
+        
+      })
+    }
 
     getAllEvents() {}
 
