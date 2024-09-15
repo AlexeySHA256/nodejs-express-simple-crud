@@ -1,5 +1,8 @@
 import express from "express";
 import router from "./routes.js";
+import { configDotenv } from "dotenv";
+
+console.log(configDotenv());
 
 const app = express();
 app.use("/api/v1", router);
