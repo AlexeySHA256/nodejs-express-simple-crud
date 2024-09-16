@@ -14,6 +14,11 @@ router.put(
   EventsHandlers.idParamValidation(),
   EventsHandlers.updateEvent
 );
+router.delete(
+  "/delete/:id",
+  EventsHandlers.idParamValidation(),
+  EventsHandlers.deleteEvent
+);
 router.get(
   "/",
   EventsHandlers.eventDateQueryValidation(),

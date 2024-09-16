@@ -112,6 +112,21 @@ class EventsHandlers {
         }
       });
   };
+
+  deleteEvent = (req, res) => {
+    this.service
+      .deleteEvent(req.params.id)
+      .then(() => res.status(204).end())
+      .catch((e) => {
+        switch (true) {
+          case e instanceof NotFoundError:
+            res.status(404).json({ error: e.message });
+            break;
+          default:
+            res.status(500).json({ error: e });
+        }
+      });
+  };
 }
 
 export default new EventsHandlers();

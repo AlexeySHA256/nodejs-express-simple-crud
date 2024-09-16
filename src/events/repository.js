@@ -75,4 +75,13 @@ export class EventRepository {
         }
       });
   }
+
+  async deleteEvent(eventId) {
+    return db.query("DELETE FROM events WHERE id = $1 RETURNING id", [eventId])
+    .then((result) => {
+      if (!result.rows.length) {
+        throw new NotFoundError(`Event with id ${eventId} not found`);
+      }
+    })
+  }
 }

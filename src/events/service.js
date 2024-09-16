@@ -15,7 +15,7 @@ export class EventsService {
     });
   }
 
-  async updateEvent(id, eventData) {
+  updateEvent(id, eventData) {
     return this.repo.getEventByID(id).then((eventObj) => {
       eventData = {
         name: eventData.name || eventObj.name,
@@ -27,5 +27,7 @@ export class EventsService {
     });
   }
 
-  deleteEvent(eventId) {}
+  deleteEvent(eventId) {
+    return this.repo.deleteEvent(eventId);
+  }
 }
