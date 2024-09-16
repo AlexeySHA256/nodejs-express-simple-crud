@@ -1,6 +1,6 @@
-import { body, query } from "express-validator";
+import { body, param, query } from "express-validator";
 import { EventsService } from "./service.js";
-import { UniqueViolationError } from "./repository.js";
+import { UniqueViolationError, NotFoundError } from "./repository.js";
 import { isValidationFailed } from "../helpers.js";
 
 class EventsHandlers {
@@ -11,21 +11,19 @@ class EventsHandlers {
   eventNameValidation() {
     return body("name")
       .trim()
-      .notEmpty()
       .isLength({ min: 3, max: 20 })
-      .withMessage("Name is required");
+      .withMessage("name should be between 3 and 20 characters");
   }
 
   eventDateValidation() {
     return body("date")
       .trim()
-      .notEmpty()
       .isDate()
-      .withMessage("Date is required");
+      .withMessage("date should be a valid date")
   }
 
   eventDescValidation() {
-    return body("description").trim().optional().isLength({ min: 5, max: 300 });
+    return body("description").trim().optional().isLength({ min: 5, max: 300 }).withMessage("description should be between 5 and 300 characters");
   }
 
   eventValidation() {
@@ -34,6 +32,18 @@ class EventsHandlers {
       this.eventDateValidation(),
       this.eventDescValidation(),
     ];
+  }
+
+  eventValidationOptional() {
+    const validationRules = this.eventValidation();
+    validationRules.forEach((validation) => validation.optional());
+    return validationRules;
+  }
+
+  eventValidationRequiredAll() {
+    const validationRules = this.eventValidation();
+    validationRules.forEach((validation) => validation.notEmpty());
+    return validationRules;
   }
 
   createEvent = (req, res) => {
@@ -61,6 +71,14 @@ class EventsHandlers {
       .withMessage("date should be a valid date");
   }
 
+  idParamValidation() {
+    return param("id")
+      .trim()
+      .notEmpty()
+      .isInt({ min: 1 })
+      .withMessage("id should be a positive integer and greater than 0");
+  }
+
   getEvents = (req, res) => {
     if (isValidationFailed(req, res)) {
       return;
@@ -69,6 +87,30 @@ class EventsHandlers {
       .getEvents(req.query.date)
       .then((result) => res.json(result))
       .catch((e) => res.status(500).json({ error: e }));
+  };
+
+  updateEvent = (req, res) => {
+    if (isValidationFailed(req, res)) {
+      return;
+    }
+    if (!Object.keys(req.body).length) {
+      return res.status(400).json({ error: "Request body is empty, nothing to update" });
+    }
+    this.service
+      .updateEvent(req.params.id, req.body)
+      .then((result) => res.json(result))
+      .catch((e) => {
+        switch (true) {
+          case e instanceof UniqueViolationError:
+            res.status(409).json({ error: e.message });
+            break;
+          case e instanceof NotFoundError:
+            res.status(404).json({ error: e.message });
+            break;
+          default:
+            res.status(500).json({ error: e });
+        }
+      });
   };
 }
 

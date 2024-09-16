@@ -5,8 +5,14 @@ const router = new Router();
 
 router.post(
   "/create",
-  ...EventsHandlers.eventValidation(),
+  ...EventsHandlers.eventValidationRequiredAll(),
   EventsHandlers.createEvent
+);
+router.put(
+  "/update/:id",
+  EventsHandlers.eventValidationOptional(),
+  EventsHandlers.idParamValidation(),
+  EventsHandlers.updateEvent
 );
 router.get(
   "/",
