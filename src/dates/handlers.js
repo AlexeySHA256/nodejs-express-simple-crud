@@ -67,6 +67,7 @@ class DatesHandlers {
     if (!errors.isEmpty()) {
       return res.status(422).json({errors: errors.array()});
     }
+    console.log(req.query);
     try {
         const currDate = this.service.getCurrentDate(req.query.timezone, req.query.format);
         res.json({currDate});
