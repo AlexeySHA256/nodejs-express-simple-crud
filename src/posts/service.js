@@ -11,4 +11,10 @@ export default class PostsService {
             return {page_size, page_num, posts, pages_range: 5};
         });
     }
+
+    async getPost(id) {
+        return this.repo.get(id).then((post) => {
+            return { post };
+        });
+    }
 }
