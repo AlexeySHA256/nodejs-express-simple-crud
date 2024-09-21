@@ -15,6 +15,9 @@ app.use(
   "/static/",
   express.static(path.resolve(path.join(import.meta.dirname, "static")))
 );
+
+app.use("/bootstrap", express.static(path.join(import.meta.dirname, "../node_modules/bootstrap/dist")));
+
 app.use(express.json());
 app.use("/api/v1", router);
 
