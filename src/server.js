@@ -4,9 +4,12 @@ import { configDotenv } from "dotenv";
 import db from "./db.js";
 import path from "path";
 
-console.log(configDotenv());
+console.log("Config loaded", configDotenv());
 
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", path.resolve(path.join(import.meta.dirname, "templates")));
 
 app.use(
   "/static/",
