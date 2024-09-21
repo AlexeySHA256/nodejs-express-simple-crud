@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <title>Posts list</title>
+</head>
+<body>
+    <div class="container p-3 d-flex flex-column align-items-center gap-2">
+        <h3>Количевство постов на страницу: <%= page_size %></h3>
+        <div class="row gap-3">
+            <% posts.forEach((post) => { %>
+                <div class="card col-3 post m-2" style="width: 18rem;">
+                    <div class="card-body d-flex flex-column">
+                      <h2 class="card-title"><%= post.title %></h2>
+                      <h6 class="card-subtitle mb-2 text-body-secondary"><%= post.author %></h6>
+                      <p class="card-text d-block text-truncate"><%= post.body %></p>
+                      <div class="mt-auto">
+                        <a href="/api/v1/posts/<%= post.id %>/" class="card-link btn btn-primary">Подробнее</a>
+                      </div>
+                    </div>
+                    <div class="card-footer">
+                      <small class="text-muted"><strong>Updated:</strong> <%= post.updated_at %></small>
+                      <small class="text-muted"><strong>Created:</strong> <%= post.created_at %></small>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item">
+                <a class="page-link" href="/api/v1/posts/?page_num=<%= (parseInt(page_num) - 1) %>" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <% for (let i = 1; i < pages_range; i++) { %>
+                <li class="page-item <% if (i == page_num) { %>active<% } %>"><a class="page-link" href="/api/v1/posts/?page_num=<%= i %>"><%= i %></a></li>
+              <% } %>
+              <li class="page-item">
+                <a class="page-link" href="/api/v1/posts/?page_num=<%= (parseInt(page_num) + 1) %>" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
