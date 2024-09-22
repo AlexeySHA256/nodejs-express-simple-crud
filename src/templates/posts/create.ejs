@@ -4,29 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <title>Post <%= post.id %> update</title>
+    <title>Posts create</title>
 </head>
 <body>
-    <a href="/posts" class="btn btn-primary m-3">Back</a>
     <div class="container p-3 d-flex flex-column align-items-center border border-secondary rounded-2 bg-light">
-        <form action="/posts/update/<%= post.id %>" class="d-flex flex-column align-items-center justify-content-center gap-2" id="update-post" method="post">
+        <form action="/posts/create" class="d-flex flex-column align-items-center justify-content-center gap-2" id="create-post" method="post">
             <div class="mb-3">
                 <label for="title" class="form-label">Title:<span class="text-danger">*</span></label>
-                <input type="text" name="title" id="title" value="<%= post.title %>" class="form-control">
+                <input type="text" name="title" class="form-control">
             </div>
             <div class="mb-3">
                 <label for="body" class="form-label">Body:<span class="text-danger">*</span></label>
-                <input type="text" name="body" id="body" value="<%= post.body %>" class="form-control">
+                <input type="text" name="body" class="form-control" id="body">
             </div>
             <div class="mb-3">
                 <label for="author_id" class="form-label">Author:<span class="text-danger">*</span></label>
                 <select name="author_id" id="author_id" class="form-select">
                     <% authors.forEach((author) => { %>
-                        <option value="<%= author.id %>"<% if (author.id === post.author_id) { %> selected<% } %>><%= author.fullname %></option>
+                        <option value="<%= author.id %>"><%= author.fullname %></option>
                     <% }) %>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Update</button>
+            <button type="submit" class="btn btn-primary">Create</button>
         </form>
     </div>
 </body>

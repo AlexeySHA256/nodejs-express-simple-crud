@@ -39,4 +39,18 @@ export default class PostsService {
       });
     });
   }
+
+  async createPostGet() {
+    return this.repo.listAuthors(100).then((authors) => {
+      return { authors };
+    });
+  }
+
+  async createPost(postData) {
+    return this.repo
+      .createPost(postData)
+      .then((post) => {
+        return { post };
+      });
+  }
 }

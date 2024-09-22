@@ -17,7 +17,7 @@
                       <h6 class="card-subtitle mb-2 text-body-secondary"><%= post.author %></h6>
                       <p class="card-text d-block text-truncate"><%= post.body %></p>
                       <div class="mt-auto">
-                        <a href="/posts/<%= post.id %>/" class="card-link btn btn-primary">Подробнее</a>
+                        <a href="/posts/detail/<%= post.id %>/" class="card-link btn btn-primary">Подробнее</a>
                       </div>
                     </div>
                     <div class="card-footer">
@@ -44,6 +44,13 @@
               </li>
             </ul>
         </nav>
+    </div>
+    <div class="position-fixed" id="create-post" style="right: 5%; bottom: 5%;">
+      <a href="/posts/create/" class="btn btn-primary rounded-circle btn-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+        </svg>
+      </>
     </div>
 </body>
 </html>
