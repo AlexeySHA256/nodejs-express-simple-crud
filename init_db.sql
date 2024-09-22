@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS posts (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     title TEXT NOT NULL,
     body TEXT NOT NULL,
-    author_id INT REFERENCES authors(id),
+    author_id INT REFERENCES authors(id) NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,5 +40,5 @@ CREATE OR REPLACE TRIGGER posts_on_update_trigger BEFORE UPDATE ON posts
 FOR EACH ROW EXECUTE PROCEDURE posts_on_update();
 
 CREATE OR REPLACE VIEW posts_v AS 
-    SELECT p.id, p.title, p.body, p.updated_at, p.created_at, a.fullname as author from posts p
+    SELECT p.id, p.title, p.body, p.updated_at, p.created_at, p.author_id, a.fullname as author from posts p
     JOIN authors a ON (p.author_id = a.id);

@@ -3,10 +3,11 @@ import eventsRouter from "./events/routes.js";
 import postsRouter from "./posts/routes.js";
 import { Router } from "express";
 
-const router = new Router();
+export const apiRouter = new Router();
 
-router.use("/dates", datesRouter);
-router.use("/events", eventsRouter);
-router.use("/posts", postsRouter)
+apiRouter.use("/dates", datesRouter);
+apiRouter.use("/events", eventsRouter);
 
-export default router;
+export const webRouter = new Router();
+
+webRouter.use("/posts", postsRouter)

@@ -1,5 +1,6 @@
 import express from "express";
-import router from "./routes.js";
+import bodyParser from "body-parser";
+import { apiRouter, webRouter } from "./routes.js";
 import { configDotenv } from "dotenv";
 import db from "./db.js";
 import path from "path";
@@ -11,6 +12,8 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.resolve(path.join(import.meta.dirname, "templates")));
 
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(
   "/static/",
   express.static(path.resolve(path.join(import.meta.dirname, "static")))
@@ -19,7 +22,8 @@ app.use(
 app.use("/bootstrap", express.static(path.join(import.meta.dirname, "../node_modules/bootstrap/dist")));
 
 app.use(express.json());
-app.use("/api/v1", router);
+app.use("/api/v1", apiRouter);
+app.use("/", webRouter);
 
 app.get("/", (req, res) => {
   res.sendFile(
