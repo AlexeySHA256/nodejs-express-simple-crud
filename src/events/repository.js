@@ -1,11 +1,5 @@
 import db from "../db.js";
 
-export class RepositoryError extends Error {}
-
-export class UniqueViolationError extends RepositoryError {}
-
-export class NotFoundError extends RepositoryError {}
-
 export class EventRepository {
   async createEvent(eventData) {
     return db

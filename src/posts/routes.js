@@ -21,4 +21,8 @@ router.post(
 router.get("/create", PostsHandlers.createPostGet);
 router.post("/create", PostsHandlers.postValidation(), PostsHandlers.createPost);
 
+router.get("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePostGet);
+
+router.post("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePost);
+
 export default router;

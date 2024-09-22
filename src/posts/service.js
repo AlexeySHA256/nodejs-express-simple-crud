@@ -1,6 +1,13 @@
+import { NotFoundError } from "../repositoryErrors.js";
 import { PostsRepository } from "./repository.js";
 
-export default class PostsService {
+export class PostNotFoundError extends Error {
+    constructor() {
+        super("Post not found");
+    }
+}
+
+export class PostsService {
   constructor() {
     this.repo = new PostsRepository();
   }
@@ -13,9 +20,13 @@ export default class PostsService {
 
   async getPost(id) {
     return this.repo.getPost(id).then((post) => {
-      console.log(id, post);
       return { post };
-    });
+    }).catch((err) => {
+      if (err instanceof NotFoundError) {
+        throw new PostNotFoundError();
+      }
+      throw err;
+    })
   }
 
   async updatePostGet(id) {
@@ -37,6 +48,11 @@ export default class PostsService {
       return this.repo.updatePost(postData).then((post) => {
         return { post };
       });
+    }).catch((err) => {
+      if (err instanceof NotFoundError) {
+        throw new PostNotFoundError();
+      }
+      throw err;
     });
   }
 
@@ -52,5 +68,14 @@ export default class PostsService {
       .then((post) => {
         return { post };
       });
+  }
+
+  async deletePost(id) {
+    return this.repo.deletePost(id).catch((err) => {
+      if (err instanceof NotFoundError) {
+        throw new PostNotFoundError();
+      }
+      throw err;
+    })
   }
 }

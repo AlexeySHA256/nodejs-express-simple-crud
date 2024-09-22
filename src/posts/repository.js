@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { NotFoundError } from "../repositoryErrors.js";
 
 export class PostsRepository {
   async listPosts(limit, offset) {
@@ -16,7 +17,12 @@ export class PostsRepository {
   async getPost(id) {
     return db
       .query("SELECT * FROM posts_v WHERE id = $1", [id])
-      .then((result) => result.rows[0]);
+      .then((result) => {
+        if (result.rows.length === 0) {
+          throw new NotFoundError(`Post with id ${id} not found`);
+        }
+        return result.rows[0];
+      });
   }
 
   async updatePost(postData) {
@@ -35,5 +41,13 @@ export class PostsRepository {
         [postData.title, postData.body, postData.author_id]
       )
       .then((result) => result.rows[0]);
+  }
+
+  async deletePost(id) {
+    db.query("DELETE FROM posts WHERE id = $1", [id]).then((result) => {
+      if (result.rowCount === 0) {
+        throw new NotFoundError(`Post with id ${id} not found`);
+      }
+    })
   }
 }

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <title>Post <%= postID %> delete</title>
+</head>
+<body>
+    <div class="container d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
+        <div class="border border-secondary p-3 rounded-2 bg-light">
+            <div><h3>Are you sure you want to delete this post?</h3></div>
+            <form action="/posts/delete/<%= postID %>" class="d-flex flex-column align-items-center" method="post">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

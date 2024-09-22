@@ -1,6 +1,6 @@
 import { query, param, body } from "express-validator";
 import { isValidationFailed } from "../helpers.js";
-import PostsService from "./service.js";
+import { PostsService, PostNotFoundError } from "./service.js";
 
 class PostsHandlers {
   constructor() {
@@ -9,16 +9,16 @@ class PostsHandlers {
 
   pageNumValidation() {
     return query("page_num")
+      .default(1)
       .isInt({ min: 1 })
-      .withMessage("limit must be an integer and greater than 0")
-      .default(1);
+      .withMessage("page_num must be an integer and greater than 0");
   }
 
   pageSizeValidation() {
     return query("page_size")
+      .default(10)
       .isInt({ min: 1 })
-      .withMessage("page_size must be an integer and greater than 0")
-      .default(10);
+      .withMessage("page_size must be an integer and greater than 0");
   }
 
   paginationValidation() {
@@ -76,7 +76,12 @@ class PostsHandlers {
     this.service
       .getPost(req.params.id)
       .then((data) => res.render("posts/detail", data))
-      .catch((e) => res.status(500).json({ error: e }));
+      .catch((e) => {
+        if (e instanceof PostNotFoundError) {
+          return res.status(404).json({ error: e.message });
+        }
+        res.status(500).json({ error: e });
+      });
   };
 
   updatePostGet = (req, res) => {
@@ -86,7 +91,12 @@ class PostsHandlers {
     this.service
       .updatePostGet(req.params.id)
       .then((data) => res.render("posts/update", data))
-      .catch((e) => res.status(500).json({ error: e }));
+      .catch((e) => {
+        if (e instanceof PostNotFoundError) {
+          return res.status(404).json({ error: e.message });
+        }
+        res.status(500).json({ error: e });
+      });
   };
 
   updatePost = (req, res) => {
@@ -94,9 +104,9 @@ class PostsHandlers {
       return;
     }
     this.service
-    .updatePost(req.params.id, req.body)
-    .then((data) => res.redirect(`posts/detail/${data.post.id}`))
-    .catch((e) => res.status(500).json({ error: e }));
+      .updatePost(req.params.id, req.body)
+      .then((data) => res.redirect(`posts/detail/${data.post.id}`))
+      .catch((e) => res.status(500).json({ error: e }));
   };
 
   createPostGet = (req, res) => {
@@ -104,13 +114,12 @@ class PostsHandlers {
       return;
     }
     this.service
-    .createPostGet()
-    .then((data) => res.render("posts/create", data))
-    .catch((e) => res.status(500).json({ error: e }));
+      .createPostGet()
+      .then((data) => res.render("posts/create", data))
+      .catch((e) => res.status(500).json({ error: e }));
   };
 
   createPost = (req, res) => {
-    console.log(req.body);
     if (isValidationFailed(req, res)) {
       return;
     }
@@ -118,6 +127,28 @@ class PostsHandlers {
       .createPost(req.body)
       .then((data) => res.redirect(`/posts/detail/${data.post.id}`))
       .catch((e) => res.status(500).json({ error: e }));
+  };
+
+  deletePostGet = (req, res) => {
+    if (isValidationFailed(req, res)) {
+      return;
+    }
+    res.render("posts/delete", { postID: req.params.id });
+  };
+
+  deletePost = (req, res) => {
+    if (isValidationFailed(req, res)) {
+      return;
+    }
+    this.service
+      .deletePost(req.params.id)
+      .then(() => res.redirect("/posts/"))
+      .catch((e) => {
+        if (e instanceof PostNotFoundError) {
+          return res.status(404).json({ error: e.message });
+        }
+        res.status(500).json({ error: e });
+      });
   };
 }
 
