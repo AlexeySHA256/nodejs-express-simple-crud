@@ -28,4 +28,7 @@ It's a simple nodejs project made using framework express.js with basic crud ope
   ```bash 
   docker exec -it dates_db psql -U postgres
   ```
-6. Copy and paste script from init_db.sql to your psql shell
+6. Create database relations and fill it with test data:
+  ```bash
+  python db.py postgres://postgres:postgres@localhost:5432/postgres
+  ```

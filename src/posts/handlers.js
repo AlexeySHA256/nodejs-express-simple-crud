@@ -1,10 +1,11 @@
 import { query, param, body } from "express-validator";
-import { isValidationFailed } from "../helpers.js";
+import { isValidationFailed } from "../utils/helpers.js";
 import { PostsService, PostNotFoundError } from "./service.js";
+import { PostCreateForm } from "./forms.js";
 
 class PostsHandlers {
   constructor() {
-    this.service = new PostsService();
+    this._service = new PostsService();
   }
 
   pageNumValidation() {
@@ -63,7 +64,7 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .listPosts(req.query.page_size, req.query.page_num)
       .then((data) => res.render("posts/list", data))
       .catch((e) => res.status(500).json({ error: e }));
@@ -73,12 +74,12 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .getPost(req.params.id)
       .then((data) => res.render("posts/detail", data))
       .catch((e) => {
         if (e instanceof PostNotFoundError) {
-          return res.status(404).json({ error: e.message });
+          return res.status(404).send(`<h1>${e.message}</h1>`);
         }
         res.status(500).json({ error: e });
       });
@@ -88,7 +89,7 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .updatePostGet(req.params.id)
       .then((data) => res.render("posts/update", data))
       .catch((e) => {
@@ -103,7 +104,7 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .updatePost(req.params.id, req.body)
       .then((data) => res.redirect(`posts/detail/${data.post.id}`))
       .catch((e) => res.status(500).json({ error: e }));
@@ -113,17 +114,24 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .createPostGet()
-      .then((data) => res.render("posts/create", data))
+      .then((data) => {
+        data.form = new PostCreateForm();
+        res.render("posts/create", data)
+      })
       .catch((e) => res.status(500).json({ error: e }));
   };
 
   createPost = (req, res) => {
-    if (isValidationFailed(req, res)) {
-      return;
+    const form = new PostCreateForm();
+    form.validate(req);
+    if (!form.isValid) {
+      return this._service.repo.listAuthors(100).then(authors => {
+        res.status(422).render("posts/create", { form, authors });
+      })
     }
-    this.service
+    this._service
       .createPost(req.body)
       .then((data) => res.redirect(`/posts/detail/${data.post.id}`))
       .catch((e) => res.status(500).json({ error: e }));
@@ -140,7 +148,7 @@ class PostsHandlers {
     if (isValidationFailed(req, res)) {
       return;
     }
-    this.service
+    this._service
       .deletePost(req.params.id)
       .then(() => res.redirect("/posts/"))
       .catch((e) => {

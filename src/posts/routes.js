@@ -1,5 +1,6 @@
 import { Router } from "express";
 import PostsHandlers from "./handlers.js";
+import { PostCreateForm } from "./forms.js";
 
 const router = new Router();
 
@@ -19,7 +20,7 @@ router.post(
 );
 
 router.get("/create", PostsHandlers.createPostGet);
-router.post("/create", PostsHandlers.postValidation(), PostsHandlers.createPost);
+router.post("/create", new PostCreateForm().getValidationChain(), PostsHandlers.createPost);
 
 router.get("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePostGet);
 

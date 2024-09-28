@@ -1,5 +1,5 @@
 import db from "../db.js";
-import { NotFoundError } from "../repositoryErrors.js";
+import { NotFoundError } from "../utils/repositoryErrors.js";
 
 export class PostsRepository {
   async listPosts(limit, offset) {
@@ -48,6 +48,6 @@ export class PostsRepository {
       if (result.rowCount === 0) {
         throw new NotFoundError(`Post with id ${id} not found`);
       }
-    })
+    });
   }
 }

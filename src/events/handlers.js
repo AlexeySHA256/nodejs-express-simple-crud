@@ -1,7 +1,7 @@
 import { body, param, query } from "express-validator";
 import { EventsService } from "./service.js";
-import { UniqueViolationError, NotFoundError } from "../repositoryErrors.js";
-import { isValidationFailed } from "../helpers.js";
+import { UniqueViolationError, NotFoundError } from "../utils/repositoryErrors.js";
+import { isValidationFailed } from "../utils/helpers.js";
 
 class EventsHandlers {
   constructor() {

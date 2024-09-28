@@ -1,10 +1,10 @@
-import { NotFoundError } from "../repositoryErrors.js";
+import { NotFoundError } from "../utils/repositoryErrors.js";
 import { PostsRepository } from "./repository.js";
 
 export class PostNotFoundError extends Error {
-    constructor() {
-        super("Post not found");
-    }
+  constructor() {
+    super("Post not found");
+  }
 }
 
 export class PostsService {
@@ -19,41 +19,47 @@ export class PostsService {
   }
 
   async getPost(id) {
-    return this.repo.getPost(id).then((post) => {
-      return { post };
-    }).catch((err) => {
-      if (err instanceof NotFoundError) {
-        throw new PostNotFoundError();
-      }
-      throw err;
-    })
+    return this.repo
+      .getPost(id)
+      .then((post) => {
+        return { post };
+      })
+      .catch((err) => {
+        if (err instanceof NotFoundError) {
+          throw new PostNotFoundError();
+        }
+        throw err;
+      });
   }
 
   async updatePostGet(id) {
     return this.repo.getPost(id).then((post) => {
       return this.repo.listAuthors(100).then((authors) => {
         return { post, authors };
-      })
+      });
     });
   }
 
   async updatePost(id, postData) {
-    return this.repo.getPost(id).then((post) => {
-      postData = {
-        title: postData.title || post.title,
-        body: postData.body || post.body,
-        author_id: postData.author_id || post.author_id,
-        id,
-      };
-      return this.repo.updatePost(postData).then((post) => {
-        return { post };
+    return this.repo
+      .getPost(id)
+      .then((post) => {
+        postData = {
+          title: postData.title || post.title,
+          body: postData.body || post.body,
+          author_id: postData.author_id || post.author_id,
+          id,
+        };
+        return this.repo.updatePost(postData).then((post) => {
+          return { post };
+        });
+      })
+      .catch((err) => {
+        if (err instanceof NotFoundError) {
+          throw new PostNotFoundError();
+        }
+        throw err;
       });
-    }).catch((err) => {
-      if (err instanceof NotFoundError) {
-        throw new PostNotFoundError();
-      }
-      throw err;
-    });
   }
 
   async createPostGet() {
@@ -63,11 +69,9 @@ export class PostsService {
   }
 
   async createPost(postData) {
-    return this.repo
-      .createPost(postData)
-      .then((post) => {
-        return { post };
-      });
+    return this.repo.createPost(postData).then((post) => {
+      return { post };
+    });
   }
 
   async deletePost(id) {
@@ -76,6 +80,6 @@ export class PostsService {
         throw new PostNotFoundError();
       }
       throw err;
-    })
+    });
   }
 }

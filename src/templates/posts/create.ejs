@@ -11,22 +11,35 @@
         <h1>Create new post</h1>
         <div class="container p-3 d-flex flex-column align-items-center border border-secondary rounded-2 bg-light">
             <form action="/posts/create" class="d-flex flex-column align-items-center justify-content-center gap-2" id="create-post" method="post">
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title:<span class="text-danger">*</span></label>
-                    <input type="text" name="title" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label for="body" class="form-label">Body:<span class="text-danger">*</span></label>
-                    <input type="text" name="body" class="form-control" id="body">
-                </div>
-                <div class="mb-3">
-                    <label for="author_id" class="form-label">Author:<span class="text-danger">*</span></label>
-                    <select name="author_id" id="author_id" class="form-select">
-                        <% authors.forEach((author) => { %>
-                            <option value="<%= author.id %>"><%= author.fullname %></option>
-                        <% }) %>
-                    </select>
-                </div>
+                <% form.fields.forEach(field => { %>
+                    <% if (field.name === "author_id") { %>
+                        <div class="mb-3">
+                            <label for="author_id" class="form-label">Author:<span class="text-danger">*</span></label>
+                            <select name="author_id" id="author_id" class="form-select" required>
+                                <% authors.forEach((author) => { %>
+                                    <option 
+                                      value="<%= author.id %>" <% if (form?.author_id === author.id) { %>
+                                      selected <% } %> > 
+                                        <%= author.fullname %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <% if (form?.fieldErrs?.author_id) { %>
+                                <div class="invalid-feedback"><%= form.fieldErrs.author_ud %></div>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="mb-3">
+                            <label for="<%= field.name %>" class="form-label"><%= field.name %>:<span class="text-danger">*</span></label>
+                            <% if (field.error) { %>
+                                <input type="text" name="<%= field.name %>" class="form-control is-invalid" required value="<%= field.value %>">
+                                <div class="invalid-feedback"><%= field.error %></div>
+                            <% } else { %>
+                                <input type="text" name="<%= field.name %>" class="form-control" required value="<%= field.value %>">
+                            <% } %>
+                        </div>
+                    <% } %>
+                <% }) %>
                 <button type="submit" class="btn btn-primary">Create</button>
             </form>
         </div>
