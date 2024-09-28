@@ -1,31 +1,45 @@
-import { body } from "express-validator";
 import { BaseForm, FormField } from "../forms.js";
+import validator from "validator";
+
+
+const postTitle = () => new FormField(
+  "title",
+  (value) => {
+    value = value.trim();
+    if (!validator.isLength(value, { min: 3, max: 20 })) {
+      return "Title should be between 3 and 20 characters"
+    }
+    return null
+  }
+)
+
+const postBody = () => new FormField(
+  "body",
+  (value) => {
+    value = value.trim();
+    if (!validator.isLength(value, { min: 10, max: 300 })) {
+      return "Body should be between 10 and 300 characters"
+    }
+    return null
+  }
+)
+
+const postAuthor = () => new FormField(
+  "author_id",
+  (value) => {
+    if (!validator.isInt(value, { min: 1 })) {
+      return "author_id must be an integer and greater than 0"
+    }
+    return null
+  }
+)
+
+const allPostFields = [postTitle(), postBody(), postAuthor()];
 
 export class PostCreateForm extends BaseForm {
-  constructor() {
-    const fields = [
-      new FormField(
-        "title",
-        body("title")
-          .trim()
-          .isLength({ min: 3, max: 20 })
-          .withMessage("title should be between 3 and 20 characters")
-      ),
-      new FormField(
-        "body",
-        body("body")
-          .trim()
-          .isLength({ min: 10, max: 300 })
-          .withMessage("body should be between 10 and 300 characters")
-      ),
-      new FormField(
-        "author_id",
-        body("author_id")
-          .trim()
-          .isInt({ min: 1 })
-          .withMessage("author should be > 0 and valid int")
-      ),
-    ];
-    super(fields);
+  constructor(data=null) {
+    super(allPostFields, data);
   }
 }
+
+export class PostUpdateForm extends PostCreateForm {}

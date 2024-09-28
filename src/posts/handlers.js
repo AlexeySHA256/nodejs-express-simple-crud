@@ -1,7 +1,7 @@
 import { query, param, body } from "express-validator";
 import { isValidationFailed } from "../utils/helpers.js";
 import { PostsService, PostNotFoundError } from "./service.js";
-import { PostCreateForm } from "./forms.js";
+import { PostCreateForm, PostUpdateForm } from "./forms.js";
 
 class PostsHandlers {
   constructor() {
@@ -118,18 +118,17 @@ class PostsHandlers {
       .createPostGet()
       .then((data) => {
         data.form = new PostCreateForm();
-        res.render("posts/create", data)
+        res.render("posts/create", data);
       })
       .catch((e) => res.status(500).json({ error: e }));
   };
 
   createPost = (req, res) => {
-    const form = new PostCreateForm();
-    form.validate(req);
-    if (!form.isValid) {
-      return this._service.repo.listAuthors(100).then(authors => {
+    const form = new PostCreateForm(req.body);
+    if (!form.validate()) {
+      return this._service.repo.listAuthors(100).then((authors) => {
         res.status(422).render("posts/create", { form, authors });
-      })
+      });
     }
     this._service
       .createPost(req.body)

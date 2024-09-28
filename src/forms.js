@@ -1,52 +1,52 @@
-import { validationResult } from "express-validator";
 
 export class FormField {
+  constructor(fieldName, validationFunc) {
+    this.name = fieldName;
+    this.validationFunc = validationFunc;
+    this.error = null;
+    this.value = null;
+  }
 
-    constructor(fieldName, validationChain) {
-        this.name = fieldName;
-        this.validation = validationChain;
-        this.error = null;
-        this.value = null;
+  validate() {
+    const result = this.validationFunc(this.value);
+    console.log(result);
+    if (result) {
+      this.error = result;
+      return false;
     }
+    this.error = null;
+    return true;
+  }
 }
 
 export class BaseForm {
+  constructor(listFields, data) {
+    // list fields should be an array of FormField objects
+    this.nonFieldErrors = [];
+    this._isValid = true;
+    this.fields = listFields;
+    this.data = data;
+  }
 
-    constructor(listFields) { // list fields should be an array of FormField objects
-        // this.fieldErrors = {};
-        this.nonFieldErrors = [];
-        this._isValid = true;
-        this.fields = listFields;
-    }
-
-    getValidationChain() {
-        let res = [];
-        this.fields.forEach(field => {
-            res.push(field.validation);
-        })
-        return res
-    }
-
-    validate(req) {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
+  validate() {
+    console.log(this);
+    if (this.data) {
+      this.fields.forEach(
+        (field) => {
+          const value = this.data[field.name];
+          field.value = value;
+          if (!field.validate()) {
             this._isValid = false;
-            const fieldErrors = errors.mapped();
-            this.fields.forEach(field => {
-                const err = fieldErrors[field.name];
-                if (err) {
-                    field.error = err.msg;
-                }
-                field.value = req.body[field.name];
-            })
+          }
         }
+      );
     }
+    console.log("IS VALID", this._isValid);
+    return this._isValid;
+  }
 
-    get isValid() {
-        return this._isValid && this.nonFieldErrors.length === 0;
-    }
-
-    addError(errorMsg) {
-        this.nonFieldErrors.push(errorMsg);
-    }
+  addError(errorMsg) {
+    this.nonFieldErrors.push(errorMsg);
+    this._isValid = false;
+  }
 }

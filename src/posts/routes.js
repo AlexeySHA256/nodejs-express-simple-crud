@@ -20,7 +20,7 @@ router.post(
 );
 
 router.get("/create", PostsHandlers.createPostGet);
-router.post("/create", new PostCreateForm().getValidationChain(), PostsHandlers.createPost);
+router.post("/create", PostsHandlers.createPost);
 
 router.get("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePostGet);
 
