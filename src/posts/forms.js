@@ -34,11 +34,11 @@ const postAuthor = () => new FormField(
   }
 )
 
-const allPostFields = [postTitle(), postBody(), postAuthor()];
+const allPostFields = () => [postTitle(), postBody(), postAuthor()];
 
 export class PostCreateForm extends BaseForm {
   constructor(data=null) {
-    super(allPostFields, data);
+    super(allPostFields(), data);
   }
 }
 

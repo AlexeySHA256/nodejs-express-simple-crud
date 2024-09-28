@@ -8,14 +8,9 @@ export class FormField {
   }
 
   validate() {
-    const result = this.validationFunc(this.value);
-    console.log(result);
-    if (result) {
-      this.error = result;
-      return false;
-    }
-    this.error = null;
-    return true;
+    const errorMsg = this.validationFunc(this.value);
+    this.error = errorMsg || null;
+    return !errorMsg;
   }
 }
 
@@ -29,7 +24,6 @@ export class BaseForm {
   }
 
   validate() {
-    console.log(this);
     if (this.data) {
       this.fields.forEach(
         (field) => {
@@ -41,7 +35,6 @@ export class BaseForm {
         }
       );
     }
-    console.log("IS VALID", this._isValid);
     return this._isValid;
   }
 

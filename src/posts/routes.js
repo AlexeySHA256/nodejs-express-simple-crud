@@ -1,29 +1,19 @@
 import { Router } from "express";
 import PostsHandlers from "./handlers.js";
-import { PostCreateForm } from "./forms.js";
 
 const router = new Router();
 
-router.get("/", PostsHandlers.paginationValidation(), PostsHandlers.listPosts);
-router.get("/detail/:id", PostsHandlers.idParamValidation(), PostsHandlers.getPost);
+router.get("/", PostsHandlers.listPosts);
+router.get("/detail/:id", PostsHandlers.getPost);
 
-router.get(
-  "/update/:id",
-  PostsHandlers.idParamValidation(),
-  PostsHandlers.updatePostGet
-);
-router.post(
-  "/update/:id",
-  PostsHandlers.idParamValidation(),
-  PostsHandlers.postValidation(),
-  PostsHandlers.updatePost
-);
+router.get("/update/:id", PostsHandlers.updatePostGet);
+router.post("/update/:id", PostsHandlers.updatePost);
 
 router.get("/create", PostsHandlers.createPostGet);
 router.post("/create", PostsHandlers.createPost);
 
-router.get("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePostGet);
+router.get("/delete/:id", PostsHandlers.deletePostGet);
 
-router.post("/delete/:id", PostsHandlers.idParamValidation(), PostsHandlers.deletePost);
+router.post("/delete/:id", PostsHandlers.deletePost);
 
 export default router;

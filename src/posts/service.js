@@ -1,4 +1,5 @@
 import { NotFoundError } from "../utils/repositoryErrors.js";
+import { PostCreateForm, PostUpdateForm } from "./forms.js";
 import { PostsRepository } from "./repository.js";
 
 export class PostNotFoundError extends Error {
@@ -35,7 +36,11 @@ export class PostsService {
   async updatePostGet(id) {
     return this.repo.getPost(id).then((post) => {
       return this.repo.listAuthors(100).then((authors) => {
-        return { post, authors };
+        const form = new PostUpdateForm(post);
+        form.fields.forEach((field) => {
+          field.value = post[field.name];
+        })
+        return { post, authors, form: form };
       });
     });
   }
@@ -64,7 +69,7 @@ export class PostsService {
 
   async createPostGet() {
     return this.repo.listAuthors(100).then((authors) => {
-      return { authors };
+      return { authors, form: new PostCreateForm() };
     });
   }
 
