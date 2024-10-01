@@ -4,6 +4,7 @@ import { apiRouter, webRouter } from "./routes.js";
 import { configDotenv } from "dotenv";
 import db from "./db.js";
 import path from "path";
+import cors from "cors";
 
 console.log("Config loaded", configDotenv());
 
@@ -12,6 +13,8 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.resolve(path.join(import.meta.dirname, "templates")));
 
+app.use(cors());
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
@@ -21,7 +24,6 @@ app.use(
 
 app.use("/bootstrap", express.static(path.join(import.meta.dirname, "../node_modules/bootstrap/dist")));
 
-app.use(express.json());
 app.use("/api/v1", apiRouter);
 app.use("/", webRouter);
 

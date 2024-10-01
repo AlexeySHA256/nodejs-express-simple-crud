@@ -1,7 +1,7 @@
 import { Router } from "express";
-import PostsHandlers from "./handlers.js";
+import { handlers as PostsHandlers, apiHandlers as PostsApiHandlers } from "./handlers.js";
 
-const router = new Router();
+export const router = new Router();
 
 router.get("/", PostsHandlers.listPosts);
 router.get("/detail/:id", PostsHandlers.getPost);
@@ -16,4 +16,8 @@ router.get("/delete/:id", PostsHandlers.deletePostGet);
 
 router.post("/delete/:id", PostsHandlers.deletePost);
 
-export default router;
+export const apiRouter = new Router();
+
+apiRouter.post("/create", PostsApiHandlers.createPost);
+
+apiRouter.get("/authors", PostsApiHandlers.getListAuthors);

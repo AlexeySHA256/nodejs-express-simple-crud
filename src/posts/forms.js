@@ -5,6 +5,9 @@ import validator from "validator";
 const postTitle = () => new FormField(
   "title",
   (value) => {
+    if (!value) {
+      return "Title is required"
+    }
     value = value.trim();
     if (!validator.isLength(value, { min: 3, max: 20 })) {
       return "Title should be between 3 and 20 characters"
@@ -16,6 +19,9 @@ const postTitle = () => new FormField(
 const postBody = () => new FormField(
   "body",
   (value) => {
+    if (!value) {
+      return "Body is required"
+    }
     value = value.trim();
     if (!validator.isLength(value, { min: 10, max: 300 })) {
       return "Body should be between 10 and 300 characters"
@@ -27,6 +33,9 @@ const postBody = () => new FormField(
 const postAuthor = () => new FormField(
   "author_id",
   (value) => {
+    if (!value) {
+      return "author_id is required"
+    }
     if (!validator.isInt(value, { min: 1 })) {
       return "author_id must be an integer and greater than 0"
     }

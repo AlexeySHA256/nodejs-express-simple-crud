@@ -117,4 +117,34 @@ class PostsHandlers {
   };
 }
 
-export default new PostsHandlers();
+class PostsApiHandlers {
+  constructor() {
+    this._service = new PostsService();
+  }
+
+  getListAuthors = (req, res) => {
+    this._service
+      .repo
+      .listAuthors(100)
+      .then((authors) => res.json(authors))
+      .catch((e) => res.status(500).json({ error: e }));
+  };
+
+  createPost = (req, res) => {
+    console.log(req, req.body);
+    
+    const form = new PostCreateForm(req.body);
+    if (!form.validate()) {
+      return res.status(422).json({ errors: form.getErrors() });
+    }
+    this._service
+      .createPost(req.body)
+      .then((result) => res.status(201).json(result))
+      .catch((e) => res.status(500).json({ error: e }));
+  };
+}
+
+export const apiHandlers = new PostsApiHandlers();
+
+export const handlers = new PostsHandlers();
+

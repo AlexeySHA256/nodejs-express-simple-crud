@@ -42,4 +42,15 @@ export class BaseForm {
     this.nonFieldErrors.push(errorMsg);
     this._isValid = false;
   }
+
+  getErrors() {
+    const errors = {};
+    this.fields.forEach((field) => {
+      errors[field.name] = field.error;
+    });
+    if (this.nonFieldErrors.length > 0) {
+      errors["non_field_errors"] = this.nonFieldErrors;
+    }
+    return errors;
+  }
 }
