@@ -7,3 +7,21 @@ body {
     justify-content: space-between; 
     align-items: center;
 }
+
+a.button {
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    padding: 10px 20px;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+a.button:hover {
+    background-color: #0056b3;
+}
