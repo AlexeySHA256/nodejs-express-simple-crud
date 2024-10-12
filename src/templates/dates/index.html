@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <style>
+        .center-form {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+        }
+
+    </style>
+    <div class="center-form">
+        <form action="/api/v1/dates/current/" method="get" id="getCurrentDate" class="d-flex flex-column align-items-center gap-2">
+            <input type="text" class="form-control" name="timezone" placeholder="Ваш часовой пояс (UTC по ум.)">
+            <input type="text" class="form-control" name="format" placeholder="Формат даты (YYYY-MM-DD HH:mm:ss по ум.)">
+            <button class="btn btn-success btn-lg">Получить текущую дату</button>
+        </form>
+        <div id="result" class="text-center mt-5 fs-2 fw-bold"></div>
+    </div>
+    <script src="/static/dates/index.js"></script>
+</body>
+</html>

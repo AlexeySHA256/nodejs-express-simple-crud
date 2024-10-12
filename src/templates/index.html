@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
-    <h1 class="up">Главная страница</h1>
-    <div class="center">
-        <a href="/api/v1/dates/" class="button" style="font-size: large;">Смотреть даты</a>
-        <a href="/posts/" class="button">Смотреть посты</a>
-    </div>
-
-    <div class="down">
-        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Temporibus quasi quod tempora nisi odio magni dolore perspiciatis velit. Soluta, natus impedit perferendis quibusdam rerum corporis libero laudantium dolor sequi debitis.</p>
+    <div class="d-flex flex-column align-items-center justify-content-between p-3" style="height: 100vh;">
+        <div class="">
+            <h1>Главная страница</h1>
+        </div>
+        <div class="d-flex flex-column gap-3">
+            <a href="/api/v1/dates/" class="btn btn-primary fw-bold fs-3" style="font-size: large;">Смотреть даты</a>
+            <a href="/posts/" class="btn btn-primary fw-bold fs-3">Смотреть посты</a>
+        </div>
+        <div>
+            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Temporibus quasi quod tempora nisi odio magni dolore perspiciatis velit. Soluta, natus impedit perferendis quibusdam rerum corporis libero laudantium dolor sequi debitis.</p>
+        </div>
     </div>
 </body>
 <script>

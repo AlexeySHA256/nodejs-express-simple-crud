@@ -12,8 +12,8 @@ app.set("views", path.resolve(path.join(import.meta.dirname, "templates")));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/static/", express.static(path.resolve(path.join(import.meta.dirname, "static"))));
-app.use("/bootstrap", express.static(path.join(import.meta.dirname, "../node_modules/bootstrap/dist")));
+app.use("/static/", express.static(path.resolve(path.join(import.meta.dirname, "dist", "static"))));
+app.use("/bootstrap", express.static(path.join(import.meta.dirname, "..", "node_modules", "bootstrap", "dist")));
 app.use("/api/v1", apiRouter);
 app.use("/", webRouter);
 app.get("/", (req, res) => {

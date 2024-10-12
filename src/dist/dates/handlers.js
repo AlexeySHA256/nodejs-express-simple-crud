@@ -50,7 +50,7 @@ class DatesHandlers {
     }
     index = (req, res) => {
         try {
-            res.sendFile(path.resolve(import.meta.dirname, path.join("..", "templates", "dates.html")));
+            res.sendFile(path.resolve(import.meta.dirname, path.join("..", "templates", "dates", "index.html")));
         }
         catch (error) {
             console.error(error);
