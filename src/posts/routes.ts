@@ -19,5 +19,3 @@ router.post("/delete/:id", PostsHandlers.deletePost);
 export const apiRouter = Router();
 
 apiRouter.post("/create", PostsApiHandlers.createPost);
-
-apiRouter.get("/authors", PostsApiHandlers.getListAuthors);

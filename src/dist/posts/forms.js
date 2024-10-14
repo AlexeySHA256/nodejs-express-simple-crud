@@ -31,7 +31,7 @@ const postAuthor = () => new FormField("author_id", (value) => {
 });
 const allPostFields = () => [postTitle(), postBody(), postAuthor()];
 export class PostCreateForm extends BaseForm {
-    constructor(data = null) {
+    constructor(data) {
         super(allPostFields(), data);
     }
 }

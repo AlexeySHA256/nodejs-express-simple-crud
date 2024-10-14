@@ -26,8 +26,8 @@ export class BaseForm {
   nonFieldErrors: string[];
   _isValid: boolean;
   fields: FormField[];
-  data: { [key: string]: any } | null;
-  constructor(listFields: FormField[], data: { [key: string]: any } | null) {
+  data?: { [key: string]: string };
+  constructor(listFields: FormField[], data?: { [key: string]: string }) {
     this.nonFieldErrors = [];
     this._isValid = true;
     this.fields = listFields;
@@ -38,7 +38,7 @@ export class BaseForm {
     if (this.data) {
       this.fields.forEach(
         (field) => {
-          field.value = (<{ [key: string]: any }> this.data)[field.name];
+          field.value = (<{ [key: string]: string }> this.data)[field.name];
           if (!field.validate()) {
             this._isValid = false;
           }

@@ -1,5 +1,18 @@
+import { NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
 import { EventRepository } from "../repository.js";
 import { Event } from "./models.js";
+
+export class EventAlreadyExistsError extends Error {
+  constructor(name: string) {
+    super(`Event '${name}' already exists`);
+  }
+}
+
+export class EventNotFoundError extends Error {
+  constructor() {
+    super(`Event not found`);
+  }
+}
 
 type eventData = { name: string, date: Date, description: string };
 
@@ -9,12 +22,17 @@ export class EventsService {
     this.repo = new EventRepository();
   }
   createEvent(name: string, date: Date, description: string): Promise<Event> {
-    return this.repo.createEvent(name, date, description);
+    return this.repo.createEvent(name, date, description).catch((err) => {
+      if (err instanceof UniqueViolationError) {
+        console.log('event already exists');
+        throw new EventAlreadyExistsError(name);
+      }
+      throw err;
+    })
   }
 
   async getEvents(date?: Date): Promise<{ events: Event[], date?: Date }> {
-    const events = this.repo.listEvents(date);
-    return events.then((events) => {
+    return this.repo.listEvents(date).then((events) => {
       return { events, date };
     });
   }
@@ -30,6 +48,11 @@ export class EventsService {
       };
       event = Event.fromObject(updatedEventData);
       return this.repo.updateEvent(event);
+    }).catch((err) => {
+      if (err instanceof NotFoundError) {
+        throw new EventNotFoundError();
+      }
+      throw err;
     });
   }
 

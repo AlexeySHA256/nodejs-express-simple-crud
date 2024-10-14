@@ -1,60 +1,53 @@
-import db from "../db.js";
 import { Event } from "./domain/models.js";
 import { NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
+import { NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 export class EventRepository {
     async createEvent(name, date, description) {
-        return db
-            .query("INSERT INTO events(name, date, description) VALUES ($1, $2, $3) RETURNING *", [name, date, description])
-            .then((result) => result.rows[0])
-            .then((row) => Event.fromObject(row))
+        return prisma.event.create({ data: { name, date, description } })
+            .then((event) => Event.fromObject(event))
             .catch((err) => {
-            switch (err.code) {
-                case "23505":
-                    throw new UniqueViolationError("Event with this name already exists");
-                default:
-                    throw err;
+            if (err instanceof PrismaClientKnownRequestError && err.code === UniqueViolationErrCode) {
+                throw new UniqueViolationError("Event with this name already exists");
             }
+            throw err;
         });
     }
     async listEvents(date) {
-        let query = "SELECT * FROM events";
-        const queryArgs = [];
+        let query = prisma.event.findMany();
         if (date) {
-            query += " WHERE date = $1";
-            queryArgs.push(date);
+            query = prisma.event.findMany({ where: { date: { gte: date } } });
         }
-        return db.query(query, queryArgs).then((result) => result.rows);
+        return query.then((events) => events.map((event) => Event.fromObject(event)));
     }
     async getEventByID(eventId) {
-        return db
-            .query("SELECT * FROM events WHERE id = $1", [eventId])
-            .then((result) => {
-            if (result.rows.length === 0) {
+        return prisma.event.findUniqueOrThrow({ where: { id: eventId } })
+            .then((event) => Event.fromObject(event))
+            .catch((err) => {
+            if (err instanceof PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
                 throw new NotFoundError(`Event with id ${eventId} not found`);
             }
-            return result.rows[0];
-        }).then((row) => Event.fromObject(row));
+            throw err;
+        });
     }
     async updateEvent(event) {
-        return db
-            .query("UPDATE events SET name = $1, date = $2, description = $3 WHERE id = $4 RETURNING *", [event.name, event.date, event.description, event.id])
-            .then((result) => result.rows[0])
-            .then((row) => Event.fromObject(row))
+        return prisma.event.update({ where: { id: event.id }, data: event })
+            .then((event) => Event.fromObject(event))
             .catch((err) => {
-            switch (err.code) {
-                case "23505":
-                    throw new UniqueViolationError("Event with this name already exists");
-                default:
-                    throw err;
+            if (err instanceof PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
+                throw new NotFoundError(`Event with id ${event.id} not found`);
             }
+            throw err;
         });
     }
     async deleteEvent(eventId) {
-        return db.query("DELETE FROM events WHERE id = $1 RETURNING id", [eventId])
-            .then((result) => {
-            if (!result.rows.length) {
+        return prisma.event.delete({ where: { id: eventId } })
+            .then(() => { })
+            .catch((err) => {
+            if (err instanceof PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
                 throw new NotFoundError(`Event with id ${eventId} not found`);
             }
+            throw err;
         });
     }
 }

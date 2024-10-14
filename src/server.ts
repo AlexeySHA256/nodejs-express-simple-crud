@@ -2,7 +2,6 @@ import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 import { apiRouter, webRouter } from "./routes.js";
 import { configDotenv } from "dotenv";
-import db from "./db.js";
 import path from "path";
 import cors from "cors";
 
@@ -34,9 +33,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 const HOST = process.env.HOST || "localhost";
-const PORT = parseInt(process.env.PORT || "3000") || 3000;
+const PORT = +(process.env.PORT || "3000");
 
 app.listen(PORT, HOST, () => {
-  db.query("SELECT NOW()"); // проверка подключения к базе
   console.log(`Server is running on http://${HOST}:${PORT}`);
 });

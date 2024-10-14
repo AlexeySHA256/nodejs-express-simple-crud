@@ -1,4 +1,4 @@
-import { PostsService, PostNotFoundError } from "./service.js";
+import { PostsService, PostNotFoundError } from "./domain/service.js";
 import { PostCreateForm, PostUpdateForm } from "./forms.js";
 import validator from "validator";
 class PostsHandlers {
@@ -41,13 +41,23 @@ class PostsHandlers {
             res.status(500).json({ error: e });
         });
     };
+    _makeCtxDataForUpdatePostGet = async (postID) => {
+        return this._service.postsRepo.getPost(postID).then(async (post) => {
+            return this._service.usersRepo.listUsers(100).then((authors) => {
+                const form = new PostUpdateForm(post);
+                form.fields.forEach((field) => {
+                    field.value = post[field.name];
+                });
+                return { post, authors, form };
+            });
+        });
+    };
     updatePostGet = (req, res) => {
         if (!validator.isInt(req.params.id || "", { min: 1 })) {
             res.status(422).json({ error: "id must be an integer and greater than 0" });
             return;
         }
-        this._service
-            .updatePostGet(+req.params.id)
+        this._makeCtxDataForUpdatePostGet(+req.params.id)
             .then((data) => res.render("posts/update", data))
             .catch((e) => {
             if (e instanceof PostNotFoundError) {
@@ -60,8 +70,7 @@ class PostsHandlers {
     updatePost = (req, res) => {
         const form = new PostUpdateForm(req.body);
         if (!form.validate()) {
-            return this._service
-                .updatePostGet(+req.params.id)
+            return this._makeCtxDataForUpdatePostGet(+req.params.id)
                 .then((data) => {
                 res.status(422).render("posts/update", { ...data, form: form });
             });
@@ -72,20 +81,20 @@ class PostsHandlers {
             .catch((e) => res.status(500).json({ error: e }));
     };
     createPostGet = (req, res) => {
-        this._service
-            .createPostGet()
-            .then((data) => res.render("posts/create", data))
+        this._service.usersRepo.listUsers(100)
+            .then((users) => {
+            res.render("posts/create", { authors: users, form: new PostCreateForm() });
+        })
             .catch((e) => res.status(500).json({ error: e }));
     };
     createPost = (req, res) => {
         const form = new PostCreateForm(req.body);
         if (!form.validate()) {
-            return this._service.repo.listAuthors(100).then((authors) => {
-                res.status(422).render("posts/create", { form, authors });
-            });
+            return this._service.usersRepo.listUsers(100)
+                .then((users) => res.status(422).render("posts/create", { form, authors: users }));
         }
         this._service
-            .createPost(req.body)
+            .createPost({ title: req.body.title, body: req.body.body, author_id: +req.body.author_id })
             .then((data) => res.redirect(`/posts/detail/${data.post.id}`))
             .catch((e) => res.status(500).json({ error: e }));
     };
@@ -119,13 +128,6 @@ class PostsApiHandlers {
     constructor() {
         this._service = new PostsService();
     }
-    getListAuthors = (req, res) => {
-        this._service
-            .repo
-            .listAuthors(100)
-            .then((authors) => res.json(authors))
-            .catch((e) => res.status(500).json({ error: e }));
-    };
     createPost = (req, res) => {
         console.log(req, req.body);
         const form = new PostCreateForm(req.body);

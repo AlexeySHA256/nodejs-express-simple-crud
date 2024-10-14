@@ -6,19 +6,19 @@ volumes:
 services:
 
   app:
-    container_name: dates_api
+    container_name: nodejscrud-app
     build: .
     ports:
       - "3000:3000"
     depends_on:
-      - postgres 
+      - db
     env_file:
       - .env
     volumes:
       - ./:/app
 
-  postgres:
-    container_name: dates_db
+  db:
+    container_name: nodejscrud-db
     image: postgres:15-alpine
     ports:
       - "5432:5432"

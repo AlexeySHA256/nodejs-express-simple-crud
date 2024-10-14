@@ -10,10 +10,10 @@
     <a href="/posts" class="btn btn-primary m-3">Back to posts</a>
     <div class="container p-3 d-flex flex-column align-items-center border border-secondary rounded-2 bg-light">
         <h1><%= post.title %></h1>
-        <p class="card-subtitle mb-2 text-body-secondary"><strong>By: </strong> <%= post.author %></p>
+        <p class="card-subtitle mb-2 text-body-secondary"><strong>By: </strong> <%= post.author.fullName %></p>
         <p><%= post.body %></p>
-        <small class="text-muted"><strong>Updated:</strong> <%= post.updated_at %></small>
-        <small class="text-muted"><strong>Created:</strong> <%= post.created_at %></small>
+        <small class="text-muted"><strong>Updated:</strong> <%= post.updatedAt %></small>
+        <small class="text-muted"><strong>Created:</strong> <%= post.createdAt %></small>
         <div class="d-flex gap-2 mt-3">
             <a href="/posts/update/<%= post.id %>" class="btn btn-primary">Edit</a>
             <a href="/posts/delete/<%= post.id %>" class="btn btn-danger">Delete</a>
