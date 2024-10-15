@@ -23,6 +23,8 @@ app.use(
 
 app.use("/bootstrap", express.static(path.join(import.meta.dirname, "..", "node_modules", "bootstrap", "dist")));
 
+// connect routers
+
 app.use("/api/v1", apiRouter);
 app.use("/", webRouter);
 

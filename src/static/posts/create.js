@@ -20,7 +20,7 @@ function createToast(msg, level, title='Notification') {
 const serverAddr = "http://localhost:3000";
 
 function getAuthors() {
-    fetch(serverAddr + "/api/v1/posts/authors")
+    fetch(serverAddr + "/api/v1/users/list")
         .then((response) => response.json())
         .then((data) => {
             console.log("Success:", data);
