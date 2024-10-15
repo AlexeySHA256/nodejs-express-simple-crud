@@ -3,11 +3,14 @@ import { UserAlreadyExistsError, UsersService } from "./domain/service.js";
 import { Request, Response } from "express";
 import { UserCreateForm } from "./forms.js";
 import { BcryptHasher } from "./hashing.js";
+import { MailtrapMailer } from "../mailer.js";
 
 class UsersHandlers {
     private _service: UsersService;
     constructor() {
-        this._service = new UsersService(new BcryptHasher());
+        const hasher = new BcryptHasher();
+        const mailer = new MailtrapMailer();
+        this._service = new UsersService(hasher, mailer);
     }
 
     listUsers = (req: Request, res: Response) => {
