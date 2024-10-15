@@ -1,11 +1,13 @@
 import validator from "validator";
-import { UsersService } from "./domain/service.js";
+import { UserAlreadyExistsError, UsersService } from "./domain/service.js";
 import { Request, Response } from "express";
+import { UserCreateForm } from "./forms.js";
+import { BcryptHasher } from "./hashing.js";
 
 class UsersHandlers {
     private _service: UsersService;
     constructor() {
-        this._service = new UsersService();
+        this._service = new UsersService(new BcryptHasher());
     }
 
     listUsers = (req: Request, res: Response) => {
@@ -17,6 +19,24 @@ class UsersHandlers {
             }
         }
         this._service.listUsers(+limit);
+    }
+
+    signUp = (req: Request, res: Response) => {
+        const form = new UserCreateForm(req.body);
+        if (!form.validate()) {
+            res.status(422).json({ errors: form.getErrors() });
+            return
+        }
+        this._service
+            .signUp(req.body.firstName, req.body.lastName, req.body.email, req.body.password)
+            .then((userData) => res.status(201).json({ success: true, user: { ...userData, password: undefined } }))
+            .catch((err: Error) => {
+                if (err instanceof UserAlreadyExistsError) {
+                    res.status(409).json({ error: err.message });
+                    return
+                } 
+                res.status(500).json({ error: "Can't create user, please try again later" });
+            });
     }
 }
 
