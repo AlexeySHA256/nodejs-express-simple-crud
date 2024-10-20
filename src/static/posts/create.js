@@ -1,26 +1,8 @@
-function createToast(msg, level, title='Notification') {
-    let currDate = new Date();
-    let toast = `
-    <div class="toast text-bg-${level}" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto">${title}</strong>
-          <small class="text-body-secondary">${currDate.toLocaleString()}</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          ${msg}
-        </div>
-    </div>`
-    const toastContainer = document.querySelector('.toast-container')
-    toastContainer.insertAdjacentHTML('afterbegin', toast)
-    const createdToast = document.querySelector('.toast');
-    new bootstrap.Toast(createdToast).show()
-}
-
-const serverAddr = "http://localhost:3000";
+import { createToast } from "./toast.js";
+import serverUrl from "../../server.js";
 
 function getAuthors() {
-    fetch(serverAddr + "/api/v1/users/list")
+    fetch(serverUrl + "/api/v1/users/list")
         .then((response) => response.json())
         .then((data) => {
             console.log("Success:", data);
@@ -47,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log('input', input);
             data[input.name] = input.value;
         })
-        fetch(serverAddr + "/api/v1/posts/create", {
+        fetch(serverUrl + "/api/v1/posts/create", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

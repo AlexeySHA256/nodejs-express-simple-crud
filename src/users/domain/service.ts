@@ -16,6 +16,12 @@ export class InvalidCredentialsError extends Error {
     }
 }
 
+export class ExpiredTokenError extends Error {
+    constructor() {
+        super("Token has expired")
+    }
+}
+
 interface Hasher {
     hash(password: string): Promise<string>;
     compare(password: string, hashedPassword: string): Promise<boolean>;
@@ -49,7 +55,7 @@ export class UsersService {
                     if (!process.env.ACTIVATION_TOKEN_TTL) {
                         throw new Error('ACTIVATION_TOKEN_TTL is not defined');
                     }
-                    const activationUrl = `${serverUrl}/users/activate/`;
+                    const activationUrl = `${serverUrl}/api/v1/users/activate/`;
                     const activationToken = Token.generate(
                         id,
                         new TimeDuration(process.env.ACTIVATION_TOKEN_TTL).durationMs,
@@ -60,9 +66,9 @@ export class UsersService {
                         email,
                         "Welcome to NodeJSCrud API!",
                         `Hello, ${fullName}! You have successfully signed up for NodeJSCrud API.
-                        Please click on the link below and enter the code to activate your account:
-                        "${activationUrl}"
-                        Your activation code is: ${activationToken.plainText}`
+                        Please send request with your token to url below to activate your account:
+                        "PUT '${activationUrl}'"
+                        Your activation token is: ${activationToken.plainText}`
                     );
                     return user;
                 })
@@ -87,5 +93,16 @@ export class UsersService {
                 }
                 return user;
             });
+    }
+
+    async activateUser(plainToken: string): Promise<User> {
+        const hash = Token.hashFromPlainText(plainToken);
+        return this.tokensRepo.getToken({ hash, scope: TokenScopes.ACTIVATION, withUser: true })
+            .then((token) => {
+                if (token.isExpired()) {
+                    throw new ExpiredTokenError();
+                }
+                return this.usersRepo.updateUser(token.userId, { isActive: true });
+            })
     }
 }

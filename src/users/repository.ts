@@ -46,11 +46,40 @@ export class UsersRepository {
                throw err;
            });
     }
+
+    async updateUser(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+        return prisma.user.update({ where: { id }, data })
+            .then((user) => User.fromObject(user))
+            .catch((err) => {
+                if (err instanceof Prisma.PrismaClientKnownRequestError) {
+                    switch (err.code) {
+                        case NotFoundErrCode:
+                            throw new NotFoundError(`User with ID ${id} does not exist.`);
+                        case UniqueViolationErrCode:
+                            throw new UniqueViolationError(`User with email ${data.email} already exists.`);
+                        default:
+                            break;
+                    }
+                }
+                throw err;
+            })
+    }
 }
 
 export class TokensRepository {
     async createToken(data: { userId: number, scope: TokenScopes, expiry: Date, hash: string}): Promise<Token> {
         return prisma.token.create({ data })
             .then((token) => new Token({ ...token, scope: token.scope as TokenScopes }));
+    }
+
+    async getToken(options: { hash: string, scope: TokenScopes, withUser: boolean }): Promise<Token> {
+        return prisma.token.findUniqueOrThrow({ where: { hash: options.hash, scope: options.scope }, include: { user: options.withUser } })
+            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: User.fromObject(token.user) }))
+            .catch((err) => {
+                if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
+                    throw new NotFoundError("Token not found");
+                }
+                throw err;
+            });
     }
 }

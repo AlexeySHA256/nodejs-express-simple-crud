@@ -56,3 +56,14 @@ export class UserCreateForm extends BaseForm {
         super(fields, data);
     }
 }
+
+export class ActivateUserForm extends BaseForm {
+    constructor(data?: { [key: string]: any }) {
+        super([new FormField("token", (value): validationOutput => {
+            if (!value) {
+                return "Token is required";
+            }
+            return null;
+        })], data);
+    }  
+}

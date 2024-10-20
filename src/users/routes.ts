@@ -5,5 +5,6 @@ const router = Router();
 
 router.get("/list", UsersHandlers.listUsers);
 router.post("/signup", UsersHandlers.signUp);
+router.put("/activate", UsersHandlers.activateUser);
 
-export default router;
+export default router
