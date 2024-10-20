@@ -6,7 +6,9 @@ model User {
   lastName    String
   email    String  @unique
   posts    Post[]
-  password String
+  comments Comment[]
+  isActive Boolean @default(false)
+  passwordHash String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

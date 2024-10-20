@@ -38,8 +38,6 @@ export class PostsRepository {
   }
 
   async createPost(title: string, body: string, authorId: number): Promise<Post> {
-    // authorId = Number(authorId);  // Явное преобразование в число
-    console.log('create post', { title, body, authorId }, typeof authorId);
     return prisma.post.create({ data: { title, body, authorId } })
       .then((post) => Post.fromObject(post))
       .catch((err) => {

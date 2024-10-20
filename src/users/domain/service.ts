@@ -8,6 +8,12 @@ export class UserAlreadyExistsError extends Error {
     }
 }
 
+export class InvalidCredentialsError extends Error {
+    constructor() {
+        super("Invalid email or password")
+    }
+}
+
 interface Hasher {
     hash(password: string): Promise<string>;
     compare(password: string, hashedPassword: string): Promise<boolean>;
@@ -52,5 +58,17 @@ export class UsersService {
                     throw err;
                 });
         })
+    }
+
+    async signIn(email: string, password: string): Promise<User> {
+        return this.usersRepo
+            .getUser({ email })
+            .then(async (user) => {
+                const passwordMatch = await this._hasher.compare(password, user.passwordHash);
+                if (!passwordMatch) {
+                    throw new InvalidCredentialsError();
+                }
+                return user;
+            });
     }
 }
