@@ -1,4 +1,5 @@
 import { Post } from "../../posts/domain/models.js";
+import crypto_ from "crypto";
 
 export class User {
     id!: number;
@@ -23,19 +24,34 @@ export class User {
     }
 }
 
-enum TokenScopes {
-    Activation = "activation",
-    Authorization = "authorization"
+export enum TokenScopes {
+    AUTHORIZATION = "AUTHORIZATION",
+    ACTIVATION = "ACTIVATION"
 }
 
 export class Token {
-    scope!: TokenScopes;
-    plainText!: string;
-    hash!: string;
-    userID!: string;
+    scope: TokenScopes = TokenScopes.AUTHORIZATION;
+    plainText?: string;
+    hash?: string;
+    userId!: number;
+    expiry!: Date;
     user?: User;
 
-    constructor(obj: { scope: TokenScopes, plainText: string, hash: string, userID: string, user?: User }) {
+    constructor(obj: { scope: TokenScopes, plainText?: string, hash?: string, userId: number, expiry: Date, user?: User }) {
         Object.assign(this, obj);
+    }
+
+    static generate(userId: number, ttlMs: number, scope: TokenScopes = TokenScopes.AUTHORIZATION) {
+        const tokenData: { plainText: string, hash: string, userId: number, expiry: Date, scope: TokenScopes } = {
+            userId,
+            scope,
+            expiry: new Date(Date.now() + ttlMs),
+            plainText: "",
+            hash: ""
+        }
+        const buffer = crypto_.randomBytes(16);
+        tokenData.plainText = buffer.toString("hex");
+        tokenData.hash = crypto_.createHash("sha256").update(tokenData.plainText).digest("hex");
+        return new Token(tokenData);
     }
 }

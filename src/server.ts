@@ -37,6 +37,8 @@ app.get("/", (req: Request, res: Response) => {
 const HOST = process.env.HOST || "localhost";
 const PORT = +(process.env.PORT || "3000");
 
+export const serverUrl = `http://${HOST}:${PORT}`
+
 app.listen(PORT, HOST, () => {
   console.log(`Server is running on http://${HOST}:${PORT}`);
 });

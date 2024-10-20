@@ -1,0 +1,14 @@
+
+
+model Token {
+    hash String @id
+    user User @relation(fields: [userId], references: [id])
+    userId Int
+    expiry DateTime
+    scope Scopes @default(AUTHORIZATION)
+}
+
+enum Scopes {
+    ACTIVATION
+    AUTHORIZATION
+}

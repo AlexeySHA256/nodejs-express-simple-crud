@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js";
-import { User } from "./domain/models.js";
+import { Token, TokenScopes, User } from "./domain/models.js";
 import { NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
 
 
@@ -45,5 +45,12 @@ export class UsersRepository {
                }
                throw err;
            });
+    }
+}
+
+export class TokensRepository {
+    async createToken(data: { userId: number, scope: TokenScopes, expiry: Date, hash: string}): Promise<Token> {
+        return prisma.token.create({ data })
+            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes }));
     }
 }

@@ -32,7 +32,7 @@ class UsersHandlers {
         }
         this._service
             .signUp(req.body.firstName, req.body.lastName, req.body.email, req.body.password)
-            .then((userData) => res.status(201).json({ success: true, user: { ...userData, password: undefined } }))
+            .then((userData) => res.status(201).json({ success: true, user: { ...userData, passwordHash: undefined } }))
             .catch((err: Error) => {
                 if (err instanceof UserAlreadyExistsError) {
                     res.status(409).json({ error: err.message });
