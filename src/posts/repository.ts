@@ -44,7 +44,6 @@ export class PostsRepository {
         if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === UniqueViolationErrCode) {
           throw new UniqueViolationError(`Post with title ${title} already exists.`);
         }
-        console.log(err);
         throw err;
       })
   }
@@ -54,6 +53,7 @@ export class PostsRepository {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
         throw new NotFoundError(`Post with ID ${id} does not exist.`);
       }
+      throw err;
     })
   }
 }
@@ -65,6 +65,22 @@ export class CommentsRepository {
       .catch(err => {
         if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === ForeignKeyViolationErrCode) {
           throw new ForeignKeyViolationError("Foreign key violation");
+        }
+        throw err;
+      })
+  }
+
+  async getComment(options: { id: number, withAuthor?: boolean, withPost?: boolean }): Promise<Comment> {
+    if (options.withAuthor === undefined) {
+      options.withAuthor = false;
+    }
+    if (options.withPost === undefined) {
+      options.withPost = false;
+    }
+    return prisma.comment.findUniqueOrThrow({ where: { id: options.id }, include: { author: options.withAuthor, post: options.withPost } })
+      .catch(err => {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
+          throw new NotFoundError(`Comment with id ${options.id} does not exist`);
         }
         throw err;
       })

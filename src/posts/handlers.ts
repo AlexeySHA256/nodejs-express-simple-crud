@@ -1,4 +1,4 @@
-import { PostsService, PostNotFoundError } from "./domain/service.js";
+import { PostsService, PostNotFoundError, CommentNotFoundError } from "./domain/service.js";
 import { CommentCreateForm, PostCreateForm, PostUpdateForm } from "./forms.js";
 import validator from "validator";
 import { Request, Response } from "express";
@@ -182,6 +182,23 @@ class PostsApiHandlers {
           res.status(400).json({ error: e.message });
         } else {
           res.status(500).json({ error: e })
+        }
+      });
+  }
+
+  getComment = (req: Request, res: Response) => {
+    if (!validator.isInt(req.params.id, { min: 1 })) {
+      res.status(422).json({ error: "id must be an integer and greater than 0" });
+      return
+    }
+    this._service
+      .getComment(+req.params.id)
+      .then((comment) => res.json({ ...comment, authorId: undefined, postId: undefined }))
+      .catch((e: Error) => {
+        if (e instanceof CommentNotFoundError) {
+          res.status(404).json({ error: e.message });
+        } else {
+          res.status(500).json({ error: e });
         }
       });
   }

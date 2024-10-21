@@ -20,4 +20,8 @@ export const apiRouter = Router();
 
 apiRouter.post("/create", PostsApiHandlers.createPost);
 
-apiRouter.post("/comments/create", PostsApiHandlers.createComment)
+const _commentsSubrouter = Router();
+apiRouter.use("/comments", _commentsSubrouter);
+
+_commentsSubrouter.post("/create", PostsApiHandlers.createComment)
+_commentsSubrouter.get("/:id", PostsApiHandlers.getComment)

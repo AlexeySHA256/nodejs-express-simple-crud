@@ -11,6 +11,8 @@ export class PostNotFoundError extends Error {}
 
 export class PostAlreadyExistsError extends Error {}
 
+export class CommentNotFoundError extends Error {}
+
 export class PostsService {
   postsRepo: PostsRepository;
   usersRepo: UsersRepository;
@@ -92,6 +94,16 @@ export class PostsService {
       .catch((err) => {
         if (err instanceof ForeignKeyViolationError) {
           throw new PostNotFoundError(`Post with id ${data.postId} does not exist`);
+        }
+        throw err;
+      })
+  }
+
+  async getComment(id: number) {
+    return this.commentsRepo.getComment({ id, withAuthor: true, withPost: true })
+     .catch((err) => {
+        if (err instanceof NotFoundError) {
+          throw new CommentNotFoundError(`Comment with id ${id} does not exist`);
         }
         throw err;
       })
