@@ -32,13 +32,13 @@ export enum TokenScopes {
 
 export class Token {
     scope: TokenScopes = TokenScopes.AUTHORIZATION;
-    plainText?: string;
-    hash?: string;
+    plainText!: string;
+    hash!: string;
     userId!: number;
     expiry!: Date;
     user?: User;
 
-    constructor(obj: { scope: TokenScopes, plainText?: string, hash?: string, userId: number, expiry: Date, user?: User }) {
+    constructor(obj: { scope: TokenScopes, plainText: string, hash: string, userId: number, expiry: Date, user?: User }) {
         Object.assign(this, obj);
     }
 

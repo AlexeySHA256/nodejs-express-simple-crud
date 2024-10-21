@@ -57,6 +57,12 @@ export class UserCreateForm extends BaseForm {
     }
 }
 
+export class UserLoginForm extends BaseForm {
+    constructor(data?: { [key: string]: any }) {
+        super([userFieldsGenerator.email(), userFieldsGenerator.password()], data);
+    }
+}
+
 export class ActivateUserForm extends BaseForm {
     constructor(data?: { [key: string]: any }) {
         super([new FormField("token", (value): validationOutput => {

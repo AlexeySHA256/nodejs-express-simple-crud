@@ -1,7 +1,7 @@
 import validator from "validator";
-import { ExpiredTokenError, UserAlreadyExistsError, UsersService } from "./domain/service.js";
+import { ExpiredTokenError, InvalidCredentialsError, UserAlreadyExistsError, UsersService } from "./domain/service.js";
 import { Request, Response } from "express";
-import { ActivateUserForm, UserCreateForm } from "./forms.js";
+import { ActivateUserForm, UserCreateForm, UserLoginForm } from "./forms.js";
 import { BcryptHasher } from "./hashing.js";
 import { MailtrapMailer } from "../mailer.js";
 
@@ -39,6 +39,25 @@ class UsersHandlers {
                     return
                 } 
                 res.status(500).json({ error: "Can't create user, please try again later" });
+            });
+    }
+
+    signIn = (req: Request, res: Response) => {
+        const form = new UserLoginForm(req.body);
+        if (!form.validate()) {
+            res.status(422).json({ success: false, errors: form.getErrors() });
+            return
+        }
+        this._service
+            .signIn(req.body.email, req.body.password)
+            .then((token) => res.json({ success: true, token: token.plainText, expiry: token.expiry }))
+            .catch((err: Error) => {
+                if (err instanceof InvalidCredentialsError) {
+                    res.status(401).json({ success: false, error: err.message });
+                } else {
+                    console.log('UsersHandlers.signIn: ', err);
+                    res.status(500).json({ success: false, error: "Can't sign in, please try again later" });
+                }
             });
     }
 

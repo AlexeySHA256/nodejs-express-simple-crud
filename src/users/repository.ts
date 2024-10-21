@@ -23,7 +23,7 @@ export class UsersRepository {
             .then((user) => User.fromObject(user))
             .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
-                    throw new NotFoundError("User with this email already exists");
+                    throw new NotFoundError("User with this email wasn't found");
                 }
                 throw err;
             })
@@ -69,12 +69,18 @@ export class UsersRepository {
 export class TokensRepository {
     async createToken(data: { userId: number, scope: TokenScopes, expiry: Date, hash: string}): Promise<Token> {
         return prisma.token.create({ data })
-            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes }));
+            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, plainText: "" }));
+    }
+
+    async generateAndCreateToken(userId: number, ttlMs: number, scope: TokenScopes = TokenScopes.AUTHORIZATION): Promise<Token> {
+        const token = Token.generate(userId, ttlMs, scope);
+        await this.createToken({ userId: token.userId, scope: token.scope, expiry: token.expiry, hash: token.hash });
+        return token
     }
 
     async getToken(options: { hash: string, scope: TokenScopes, withUser: boolean }): Promise<Token> {
         return prisma.token.findUniqueOrThrow({ where: { hash: options.hash, scope: options.scope }, include: { user: options.withUser } })
-            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: User.fromObject(token.user) }))
+            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: User.fromObject(token.user), plainText: "" }))
             .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
                     throw new NotFoundError("Token not found");

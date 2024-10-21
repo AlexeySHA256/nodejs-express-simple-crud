@@ -1,4 +1,4 @@
-import { UniqueViolationError } from "../../core/repositoryErrors.js";
+import { NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
 import TimeDuration from "../../core/timeDuration.js";
 import { serverUrl } from "../../server.js";
 import { TokensRepository, UsersRepository } from "../repository.js";
@@ -55,13 +55,8 @@ export class UsersService {
                     if (!process.env.ACTIVATION_TOKEN_TTL) {
                         throw new Error('ACTIVATION_TOKEN_TTL is not defined');
                     }
+                    const activationToken = await this.tokensRepo.generateAndCreateToken(id, new TimeDuration(process.env.ACTIVATION_TOKEN_TTL).durationMs, TokenScopes.ACTIVATION);
                     const activationUrl = `${serverUrl}/api/v1/users/activate/`;
-                    const activationToken = Token.generate(
-                        id,
-                        new TimeDuration(process.env.ACTIVATION_TOKEN_TTL).durationMs,
-                        TokenScopes.ACTIVATION
-                    );
-                    this.tokensRepo.createToken({ expiry: activationToken.expiry, hash: activationToken.hash as string, scope: activationToken.scope, userId: id });
                     await this._mailer.sendMail(
                         email,
                         "Welcome to NodeJSCrud API!",
@@ -83,7 +78,7 @@ export class UsersService {
         })
     }
 
-    async signIn(email: string, password: string): Promise<User> {
+    async signIn(email: string, password: string): Promise<Token> {
         return this.usersRepo
             .getUser({ email })
             .then(async (user) => {
@@ -91,7 +86,18 @@ export class UsersService {
                 if (!passwordMatch) {
                     throw new InvalidCredentialsError();
                 }
-                return user;
+                if (!process.env.AUTHORIZATION_TOKEN_TTL) {
+                    throw new Error('AUTHORIZATION_TOKEN_TTL is not defined');
+                }
+                const token = await this.tokensRepo.generateAndCreateToken(
+                    user.id, new TimeDuration(process.env.AUTHORIZATION_TOKEN_TTL).durationMs
+                );
+                return token;
+            }).catch((err) => {
+                if (err instanceof NotFoundError) {
+                    throw new InvalidCredentialsError();
+                }
+                throw err;
             });
     }
 
