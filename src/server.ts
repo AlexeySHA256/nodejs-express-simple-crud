@@ -4,6 +4,7 @@ import { apiRouter, webRouter } from "./routes.js";
 import { configDotenv } from "dotenv";
 import path from "path";
 import cors from "cors";
+import middlewares from "./core/middlewares.js";
 
 console.log("Config loaded", configDotenv());
 
@@ -22,6 +23,8 @@ app.use(
 );
 
 app.use("/bootstrap", express.static(path.join(import.meta.dirname, "..", "node_modules", "bootstrap", "dist")));
+
+app.use(middlewares.authenticate);
 
 // connect routers
 

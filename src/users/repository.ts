@@ -78,7 +78,10 @@ export class TokensRepository {
         return token
     }
 
-    async getToken(options: { hash: string, scope: TokenScopes, withUser: boolean }): Promise<Token> {
+    async getToken(options: { hash: string, scope: TokenScopes, withUser?: boolean }): Promise<Token> {
+        if (options.withUser === undefined) {
+            options.withUser = false;
+        }
         return prisma.token.findUniqueOrThrow({ where: { hash: options.hash, scope: options.scope }, include: { user: options.withUser } })
             .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: User.fromObject(token.user), plainText: "" }))
             .catch((err) => {

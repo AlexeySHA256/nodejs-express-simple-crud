@@ -23,6 +23,7 @@ export class PostsService {
   postsRepo: PostsRepository;
   usersRepo: UsersRepository;
   constructor() {
+    // TODO: Изолировать от прямого использования репозиториев, вместо этого использовать интерфейсы
     this.postsRepo = new PostsRepository();
     this.usersRepo = new UsersRepository();
   }

@@ -14,14 +14,19 @@ class UsersHandlers {
     }
 
     listUsers = (req: Request, res: Response) => {
-        const limit = String(req.query.limit);
+        let limit = req.query.limit;
         if (limit) {
-            if (!validator.isInt(limit, { min: 1 })) {
+            limit = String(limit)
+            if (!validator.isInt(String(limit), { min: 1 })) {
                 res.status(422).json({ error: "limit must be a positive integer" });
                 return;
             }
+        } else {
+            limit = "10"
         }
-        this._service.listUsers(+limit);
+        this._service.listUsers(+limit)
+            .then((users) => res.json({ success: true, limit, users }))
+            .catch((err) => res.status(500).json({ error: err }));
     }
 
     signUp = (req: Request, res: Response) => {

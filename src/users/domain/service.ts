@@ -37,6 +37,7 @@ export class UsersService {
     private _hasher: Hasher;
     private _mailer: MailProvider; 
     constructor(hasher: Hasher, mailer: MailProvider) {
+        // TODO: Изолировать от прямого использования репозиториев, вместо этого использовать интерфейсы
         this.usersRepo = new UsersRepository();
         this.tokensRepo = new TokensRepository();
         this._hasher = hasher;
