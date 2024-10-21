@@ -1,31 +1,25 @@
-import { NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
-import { PostCreateForm, PostUpdateForm } from "../forms.js";
-import { PostsRepository } from "../repository.js";
+import { ForeignKeyViolationError, NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
+import { CommentsRepository, PostsRepository } from "../repository.js";
 import { Post } from "../domain/models.js";
-import { User } from "../../users/domain/models.js";
 import { UsersRepository } from "../../users/repository.js";
+import { Comment as CommentP, Prisma } from "@prisma/client";
 
-type postData = {id?: number, title: string, body: string, author_id: number};
 
-export class PostNotFoundError extends Error {
-  constructor() {
-    super("Post not found");
-  }
-}
+type postData = { title: string, body: string, authorId: number};
 
-export class PostAlreadyExistsError extends Error {
-  constructor() {
-    super("Post already exists");
-  }
-}
+export class PostNotFoundError extends Error {}
+
+export class PostAlreadyExistsError extends Error {}
 
 export class PostsService {
   postsRepo: PostsRepository;
   usersRepo: UsersRepository;
+  commentsRepo: CommentsRepository;
   constructor() {
     // TODO: Изолировать от прямого использования репозиториев, вместо этого использовать интерфейсы
     this.postsRepo = new PostsRepository();
     this.usersRepo = new UsersRepository();
+    this.commentsRepo = new CommentsRepository();
   }
 
   async listPosts(page_size: number, page_num: number) {
@@ -57,7 +51,7 @@ export class PostsService {
           id: id,
           title: postData.title || post.title,
           body: postData.body || post.body,
-          author_id: postData.author_id || post.authorId,
+          author_id: postData.authorId || post.authorId,
         }
         post = Post.fromObject(updatedPostData);
         return this.postsRepo.updatePost(post).then((post) => {
@@ -73,12 +67,12 @@ export class PostsService {
   }
 
   async createPost(postData: postData) {
-    return this.postsRepo.createPost(postData.title, postData.body, postData.author_id)
+    return this.postsRepo.createPost(postData.title, postData.body, postData.authorId)
       .then((post) => { return { post } })
       .catch((err) => {
         if (err instanceof UniqueViolationError) {
           console.log('post already exists');
-          throw new PostAlreadyExistsError();
+          throw new PostAlreadyExistsError(err.message);
         }
         throw err;
       })
@@ -91,5 +85,15 @@ export class PostsService {
       }
       throw err;
     });
+  }
+
+  async createComment(data: Prisma.CommentUncheckedCreateInput): Promise<CommentP> {
+    return this.commentsRepo.createComment(data)
+      .catch((err) => {
+        if (err instanceof ForeignKeyViolationError) {
+          throw new PostNotFoundError(`Post with id ${data.postId} does not exist`);
+        }
+        throw err;
+      })
   }
 }

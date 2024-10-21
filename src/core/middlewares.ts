@@ -11,7 +11,7 @@ class Middlewares {
     }
 
     authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const unathorized = () => res.status(401).json({ success: false, error: "Unauthorized" });  
+        const unathorized = (msg: string = "Unauthorized") => res.status(401).json({ success: false, error: msg });  
         const authHeader = req.headers.authorization;
         if (!authHeader) {
             next();
@@ -19,14 +19,14 @@ class Middlewares {
         }
         const [prefix, plainToken] = authHeader.split(" ");
         if (authHeader.split(" ").length !== 2 || prefix !== "Bearer") {
-            unathorized();
+            unathorized("Invalid token format, should be: 'Bearer <token>'");
             return
         }
         const tokenHash = Token.hashFromPlainText(plainToken);
         this._tokensRepo.getToken({ hash: tokenHash, scope: TokenScopes.AUTHORIZATION, withUser: true })
             .then((token) => {
                 if (token.isExpired()) {
-                    unathorized();
+                    unathorized("Token expired");
                 } else {
                     req.user = token.user;
                     next();
@@ -34,6 +34,7 @@ class Middlewares {
             })
             .catch((err) => {
                 if (err instanceof NotFoundError) {
+                    console.log('token not found', 'plaintext', plainToken);
                     unathorized();
                 } else {
                     res.status(500).json({ success: false, error: "Internal server error" });

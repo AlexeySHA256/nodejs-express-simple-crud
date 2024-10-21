@@ -1,8 +1,8 @@
-import { NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
+import { ForeignKeyViolationError, NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
 import { Post } from "./domain/models.js";
-import { NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js";
+import { ForeignKeyViolationErrCode, NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js";
 import { User } from "../users/domain/models.js";
-import { Prisma } from "@prisma/client";
+import { Comment, Prisma } from "@prisma/client";
 
 export class PostsRepository {
   async listPosts(limit: number, offset: number): Promise<Post[]> {
@@ -55,5 +55,18 @@ export class PostsRepository {
         throw new NotFoundError(`Post with ID ${id} does not exist.`);
       }
     })
+  }
+}
+
+
+export class CommentsRepository {
+  async createComment(data: Prisma.CommentUncheckedCreateInput): Promise<Comment> {
+    return prisma.comment.create({ data })
+      .catch(err => {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === ForeignKeyViolationErrCode) {
+          throw new ForeignKeyViolationError("Foreign key violation");
+        }
+        throw err;
+      })
   }
 }

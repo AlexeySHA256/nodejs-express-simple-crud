@@ -19,3 +19,5 @@ router.post("/delete/:id", PostsHandlers.deletePost);
 export const apiRouter = Router();
 
 apiRouter.post("/create", PostsApiHandlers.createPost);
+
+apiRouter.post("/comments/create", PostsApiHandlers.createComment)
