@@ -26,3 +26,4 @@ apiRouter.use("/comments", _commentsSubrouter);
 _commentsSubrouter.post("/create", PostsApiHandlers.createComment)
 _commentsSubrouter.put("/update/:id", PostsApiHandlers.updateComment)
 _commentsSubrouter.get("/:id", PostsApiHandlers.getComment)
+_commentsSubrouter.delete("/delete/:id", PostsApiHandlers.deleteComment)

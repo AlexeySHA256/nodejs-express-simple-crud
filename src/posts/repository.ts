@@ -95,4 +95,13 @@ export class CommentsRepository {
         throw err;
       })
   }
+
+  async deleteComment(id: number): Promise<void> {
+    prisma.comment.delete({ where: { id } }).catch((err) => {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
+        throw new NotFoundError(`Comment with id ${id} does not exist`);
+      }
+      throw err;
+    })
+  }
 }

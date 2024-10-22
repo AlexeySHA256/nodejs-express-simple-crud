@@ -127,4 +127,13 @@ export class PostsService {
         throw err;
       });
   }
+
+  async deleteComment(id: number) {
+    return this.commentsRepo.deleteComment(id).catch((err) => {
+      if (err instanceof NotFoundError) {
+        throw new CommentNotFoundError(`Comment with id ${id} does not exist`);
+      }
+      throw err;
+    });
+  }
 }

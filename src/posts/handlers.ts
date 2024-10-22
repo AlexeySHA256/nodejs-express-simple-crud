@@ -224,6 +224,23 @@ class PostsApiHandlers {
         }
       });
   }
+
+  deleteComment = (req: Request, res: Response) => {
+    if (!validator.isInt(req.params.id, { min: 1 })) {
+      res.status(422).json({ error: "id must be an integer and greater than 0" });
+      return
+    }
+    this._service
+      .deleteComment(+req.params.id)
+      .then(() => res.status(204).json({ success: true }))
+      .catch((e: Error) => {
+        if (e instanceof CommentNotFoundError) {
+          res.status(404).json({ error: e.message });
+        } else {
+          res.status(500).json({ error: e });
+        }
+      });
+  }
 }
 
 export const apiHandlers = new PostsApiHandlers();
