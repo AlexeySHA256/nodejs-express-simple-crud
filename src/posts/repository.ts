@@ -85,4 +85,14 @@ export class CommentsRepository {
         throw err;
       })
   }
+
+  async updateComment(id: number, data: Prisma.CommentUpdateInput): Promise<Comment> {
+    return prisma.comment.update({ where: { id }, data })
+      .catch(err => {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
+          throw new NotFoundError(`Comment with id ${id} does not exist`);
+        }
+        throw err;
+      })
+  }
 }

@@ -7,18 +7,25 @@ export class FormField {
   validationFunc: validationFuncT;
   error: string | null;
   value: any;
+  required: boolean = false;
 
-  constructor(fieldName: string, validationFunc: validationFuncT) {
+  constructor(fieldName: string, validationFunc: validationFuncT, isRequired?: boolean) {
     this.name = fieldName;
     this.validationFunc = validationFunc;
     this.error = null;
     this.value = null;
+    if (isRequired !== undefined) {
+      this.required = isRequired;
+    }
   }
 
   validate() {
-    const errorMsg = this.validationFunc(this.value);
-    this.error = errorMsg || null;
-    return !errorMsg;
+    if (this.required) {
+      this.error = this.value ? this.validationFunc(this.value) : `${this.name} is required`;
+    } else {
+      this.error = this.value ? this.validationFunc(this.value) : null
+    }
+    return !this.error;
   }
 }
 
@@ -35,16 +42,17 @@ export class BaseForm {
   }
 
   validate() {
-    if (this.data) {
-      this.fields.forEach(
-        (field) => {
-          field.value = (<{ [key: string]: string }> this.data)[field.name];
-          if (!field.validate()) {
-            this._isValid = false;
-          }
-        }
-      );
+    if (!this.data) {
+      throw new Error("Can't validate form without provided data. Please supply a valid data.")
     }
+    this.fields.forEach(
+      (field) => {
+        field.value = (this.data as { [key: string]: string })[field.name];
+        if (!field.validate()) {
+          this._isValid = false;
+        }
+      }
+    );
     return this._isValid;
   }
 

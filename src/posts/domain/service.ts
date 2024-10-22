@@ -1,9 +1,8 @@
 import { ForeignKeyViolationError, NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
 import { CommentsRepository, PostsRepository } from "../repository.js";
-import { Post } from "../domain/models.js";
+import { Post, Comment } from "../domain/models.js";
 import { UsersRepository } from "../../users/repository.js";
 import { Comment as CommentP, Prisma } from "@prisma/client";
-
 
 type postData = { title: string, body: string, authorId: number};
 
@@ -107,5 +106,25 @@ export class PostsService {
         }
         throw err;
       })
+  }
+
+
+  async updateComment(id: number, data: Prisma.CommentUncheckedUpdateInput): Promise<CommentP> {
+    return this.commentsRepo.getComment({ id })
+     .then(async (comment) => {
+        const updatedCommentData = {
+          title: (data.title || comment.title) as string,
+          content: (data.content || comment.content) as string,
+          postId: (data.postId || comment.postId) as number,
+          imageUrl: (data.imageUrl || comment.imageUrl) as string
+        };
+        return await this.commentsRepo.updateComment(id, updatedCommentData)
+      })
+     .catch((err) => {
+        if (err instanceof NotFoundError) {
+          throw new CommentNotFoundError(`Comment with id ${id} does not exist`);
+        }
+        throw err;
+      });
   }
 }

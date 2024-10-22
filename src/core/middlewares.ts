@@ -26,7 +26,7 @@ class Middlewares {
         this._tokensRepo.getToken({ hash: tokenHash, scope: TokenScopes.AUTHORIZATION, withUser: true })
             .then((token) => {
                 if (token.isExpired()) {
-                    unathorized("Token expired");
+                    unathorized("Your token expired, can't authenticate");
                 } else {
                     req.user = token.user;
                     next();

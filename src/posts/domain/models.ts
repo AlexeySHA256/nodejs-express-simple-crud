@@ -23,3 +23,23 @@ export class Post {
         return new Post(obj.id, obj.title, obj.body, obj.authorId, obj.author, obj.createdAt, obj.updatedAt);
     }
 }
+
+
+export class Comment {
+    id!: number;
+    title!: string;
+    content!: string;
+    authorId!: number;
+    postId!: number;
+    post?: Post;
+    author?: User;
+    createdAt!: Date;
+    updatedAt!: Date;
+
+    constructor(
+        data: {id: number, title: string, content: string, authorId: number, postId: number,
+        post?: Post, author?: User, createdAt: Date, updatedAt: Date}
+    ) {
+        Object.assign(this, data);
+    }
+}
