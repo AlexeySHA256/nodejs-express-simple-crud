@@ -2,6 +2,8 @@
 export type validationOutput = string | null
 type validationFuncT = (value: any) => validationOutput
 
+export type fieldGenerators = { [key: string]: (isRequired: boolean) => FormField }
+
 export class FormField {
   name: string;
   validationFunc: validationFuncT;

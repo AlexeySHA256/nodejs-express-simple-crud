@@ -23,6 +23,8 @@ apiRouter.post("/create", PostsApiHandlers.createPost);
 const _commentsSubrouter = Router();
 apiRouter.use("/comments", _commentsSubrouter);
 
+// TODO: Подумать над тем, не лучше ли передавать id поста связанного с комментом в url вместо тела запроса
+
 _commentsSubrouter.post("/create", PostsApiHandlers.createComment)
 _commentsSubrouter.put("/update/:id", PostsApiHandlers.updateComment)
 _commentsSubrouter.get("/:id", PostsApiHandlers.getComment)

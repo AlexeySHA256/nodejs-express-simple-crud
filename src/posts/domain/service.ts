@@ -31,7 +31,7 @@ export class PostsService {
 
   async getPost(id: number) {
     return this.postsRepo
-      .getPost(id)
+      .getPost({ id, withAuthor: true, withComments: true })
       .then((post) => {
         return { post };
       })
@@ -45,17 +45,14 @@ export class PostsService {
 
   async updatePost(id: number, postData: Partial<postData>) {
     return this.postsRepo
-      .getPost(id)
-      .then((post: Post) => {
-        const updatedPostData = {
-          ...post,
-          id: id,
+      .getPost({ id })
+      .then(async (post: Post) => {
+        const updatedPostData: Prisma.PostUncheckedCreateInput = {
           title: postData.title || post.title,
           body: postData.body || post.body,
-          author_id: postData.authorId || post.authorId,
+          authorId: postData.authorId || post.authorId,
         }
-        post = Post.fromObject(updatedPostData);
-        return this.postsRepo.updatePost(post).then((post) => {
+        return this.postsRepo.updatePost(id, updatedPostData).then((post) => {
           return { post };
         });
       })

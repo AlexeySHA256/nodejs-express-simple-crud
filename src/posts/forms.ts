@@ -1,8 +1,8 @@
-import { BaseForm, FormField, validationOutput } from "../core/forms.js";
+import { BaseForm, fieldGenerators, FormField, validationOutput } from "../core/forms.js";
 import validator from "validator";
 
-const postFieldsGenerator = {
-  title: () => new FormField(
+const postFieldsGenerator: fieldGenerators = {
+  title: (isRequired: boolean) => new FormField(
     "title",
     (value): validationOutput => {
       value = String(value).trim();
@@ -10,9 +10,10 @@ const postFieldsGenerator = {
         return "Title should be between 3 and 20 characters"
       }
       return null
-    }
+    },
+    isRequired
   ),
-  body: () => new FormField(
+  body: (isRequired: boolean) => new FormField(
     "body",
     (value): validationOutput => {
       value = String(value).trim();
@@ -21,12 +22,13 @@ const postFieldsGenerator = {
         return `Body should be between ${options.min} and ${options.max} characters`
       }
       return null
-    }
+    },
+    isRequired
   ),
 }
 
-const commentFieldsGenerator = {
-  title: () => new FormField(
+const commentFieldsGenerator: fieldGenerators = {
+  title: (isRequired: boolean) => new FormField(
     'title',
     (value): validationOutput => {
       value = String(value).trim();
@@ -35,9 +37,10 @@ const commentFieldsGenerator = {
         return `Title should be between ${options.min} and ${options.max} characters`
       }
       return null
-    }
+    },
+    isRequired
   ),
-  content: () => new FormField(
+  content: (isRequired: boolean) => new FormField(
     'content',
     (value): validationOutput => {
       value = value.trim();
@@ -45,10 +48,11 @@ const commentFieldsGenerator = {
         return 'Content should be between 10 and 300 characters'
       }
       return null
-    }
+    },
+    isRequired
   ),
 
-  imageUrl: () => new FormField(
+  imageUrl: (isRequired: boolean) => new FormField(
     'imageUrl',
     (value): validationOutput => {
       value = String(value).trim();
@@ -56,46 +60,46 @@ const commentFieldsGenerator = {
         return 'Image URL is not valid'
       }
       return null
-    }
+    },
+    isRequired
   ),
 
-  postId: () => new FormField('postId', (value): validationOutput => {
+  postId: (isRequired: boolean) => new FormField('postId', (value): validationOutput => {
       if (!validator.isInt(String(value))) {
         return 'Post ID is not valid'
       }
       return null
-    }
+    },
+    isRequired
   ),
 }
 
 export class PostCreateForm extends BaseForm {
   constructor(data?: { [key: string]: any }) {
-    super(Object.values(postFieldsGenerator).map((fieldGen) => {
-      const field = fieldGen()
-      field.required = true
-      return field
-    }), data);
+    super(Object.values(postFieldsGenerator).map((fieldGen) => fieldGen(true)), data);
   }
 }
 
 export class PostUpdateForm extends BaseForm {
   constructor(data?: { [key: string]: any }) {
-    super(Object.values(postFieldsGenerator).map((fieldGen) => fieldGen()), data);
+    super(Object.values(postFieldsGenerator).map((fieldGen) => fieldGen(false)), data);
   }
 }
 
 export class CommentCreateForm extends BaseForm {
   constructor(data?: { [key: string]: any }) {
-    super(Object.values(commentFieldsGenerator).map((fieldGen) => {
-      const field = fieldGen()
-      field.required = true
-      return field
-    }), data);
+    const fields = [
+      commentFieldsGenerator.title(true),
+      commentFieldsGenerator.content(true),
+      commentFieldsGenerator.imageUrl(false),
+      commentFieldsGenerator.postId(true)
+    ]
+    super(fields, data);
   }
 }
 
 export class CommentUpdateForm extends BaseForm {
   constructor(data?: { [key: string]: any }) {
-    super(Object.values(commentFieldsGenerator).map((fieldGen) => fieldGen()), data);
+    super(Object.values(commentFieldsGenerator).map((fieldGen) => fieldGen(false)), data);
   }
 }

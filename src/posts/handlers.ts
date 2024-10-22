@@ -4,7 +4,6 @@ import validator from "validator";
 import { Request, Response } from "express";
 import { Post } from "./domain/models.js";
 import { User } from "../users/domain/models.js";
-import { serverUrl } from "../server.js";
 
 class PostsHandlers {
   private _service!: PostsService;
@@ -51,7 +50,7 @@ class PostsHandlers {
   };
 
   _makeCtxDataForUpdatePostGet = async (postID: number): Promise<{ post: Post; authors: User[]; form: PostUpdateForm }> => {
-    return this._service.postsRepo.getPost(postID).then(async (post) => {
+    return this._service.postsRepo.getPost({ id: postID }).then(async (post) => {
       return this._service.usersRepo.listUsers(100).then((authors) => {
         const form = new PostUpdateForm(post);
         form.fields.forEach((field) => {
