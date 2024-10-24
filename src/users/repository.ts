@@ -3,8 +3,19 @@ import { NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js
 import { Token, TokenScopes, User } from "./domain/models.js";
 import { NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
 
+export interface UsersRepositoryI {
+    listUsers(limit?: number): Promise<User[]>;
+    getUser(options: { id?: number, email?: string }): Promise<User>;
+    createUser(firstName: string, lastName: string, email: string, passwordHash: string): Promise<User>;
+    updateUser(id: number, data: Prisma.UserUpdateInput): Promise<User>;
+}
 
-export class UsersRepository {
+export interface TokensRepositoryI {
+    generateAndCreateToken(userId: number, ttlMs: number, scope: TokenScopes): Promise<Token>;
+    getToken(options: { hash: string, scope: TokenScopes, withUser?: boolean }): Promise<Token>;
+}
+
+export class UsersRepositoryImpl {
     async listUsers(limit?: number): Promise<User[]> {
         const options: Prisma.UserFindManyArgs = {}
         if (limit) {
@@ -66,7 +77,7 @@ export class UsersRepository {
     }
 }
 
-export class TokensRepository {
+export class TokensRepositoryImpl {
     async createToken(data: { userId: number, scope: TokenScopes, expiry: Date, hash: string}): Promise<Token> {
         return prisma.token.create({ data })
             .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, plainText: "" }));

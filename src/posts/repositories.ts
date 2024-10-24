@@ -4,7 +4,27 @@ import { ForeignKeyViolationErrCode, NotFoundErrCode, prisma, UniqueViolationErr
 import { User } from "../users/domain/models.js";
 import { Comment as CommentP, Prisma } from "@prisma/client";
 
-export class PostsRepository {
+export interface PostsRepositoryI {
+  countPosts(): Promise<number>;
+  listPosts(limit: number, offset: number): Promise<Post[]>;
+  getPost(options: { id: number, withAuthor?: boolean, withComments?: boolean }): Promise<Post>;
+  updatePost(id: number, data: Prisma.PostUncheckedCreateInput): Promise<Post>;
+  deletePost(id: number): Promise<void>;
+  createPost(title: string, body: string, authorId: number): Promise<Post>;
+}
+
+export interface CommentsRepositoryI {
+  createComment(data: Prisma.CommentUncheckedCreateInput): Promise<CommentP>;
+  getComment(options: { id: number, withAuthor?: boolean, withPost?: boolean }): Promise<CommentP>;
+  updateComment(id: number, data: Prisma.CommentUpdateInput): Promise<CommentP>;
+  deleteComment(id: number): Promise<void>;
+}
+
+export class PostsRepositoryImpl {
+  async countPosts(): Promise<number> {
+    return prisma.post.count();
+  }
+
   async listPosts(limit: number, offset: number): Promise<Post[]> {
     return prisma.post.findMany({
       take: limit,
@@ -62,8 +82,7 @@ export class PostsRepository {
   }
 }
 
-
-export class CommentsRepository {
+export class CommentsRepositoryImpl {
   async createComment(data: Prisma.CommentUncheckedCreateInput): Promise<CommentP> {
     return prisma.comment.create({ data })
       .catch(err => {

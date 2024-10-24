@@ -2,15 +2,19 @@ import validator from "validator";
 import { ExpiredTokenError, InvalidCredentialsError, UserAlreadyExistsError, UsersService } from "./domain/service.js";
 import { Request, Response } from "express";
 import { ActivateUserForm, UserCreateForm, UserLoginForm } from "./forms.js";
-import { BcryptHasher } from "./hashing.js";
-import { MailtrapMailer } from "../mailer.js";
+import { Token, User } from "./domain/models.js";
 
-class UsersHandlers {
-    private _service: UsersService;
-    constructor() {
-        const hasher = new BcryptHasher();
-        const mailer = new MailtrapMailer();
-        this._service = new UsersService(hasher, mailer);
+interface UsersServiceI {
+    listUsers(limit: number): Promise<User[]>
+    signUp(firstName: string, lastName: string, email: string, password: string): Promise<User>
+    signIn(email: string, password: string): Promise<Token>
+    activateUser(plainToken: string): Promise<User>
+}
+
+export default class UsersHandlers {
+    private _service: UsersServiceI;
+    constructor(service: UsersServiceI) {
+        this._service = service
     }
 
     listUsers = (req: Request, res: Response) => {
@@ -85,5 +89,3 @@ class UsersHandlers {
             });
     }
 }
-
-export default new UsersHandlers();

@@ -1,11 +1,12 @@
 import { Router } from "express";
-import UsersHandlers from "./handlers.js";
-
+import { container } from "./main.js";
+ 
 const router = Router();
+const usersHandlers = container.handlers
 
-router.get("/list", UsersHandlers.listUsers);
-router.post("/signup", UsersHandlers.signUp);
-router.post("/signin", UsersHandlers.signIn);
-router.put("/activate", UsersHandlers.activateUser);
+router.get("/list", usersHandlers.listUsers);
+router.post("/signup", usersHandlers.signUp);
+router.post("/signin", usersHandlers.signIn);
+router.put("/activate", usersHandlers.activateUser);
 
 export default router

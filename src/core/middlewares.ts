@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { TokensRepository, UsersRepository } from "../users/repository.js";
+import { TokensRepositoryImpl, UsersRepositoryImpl } from "../users/repository.js";
 import { Token, TokenScopes } from "../users/domain/models.js";
 import { NotFoundError } from "./repositoryErrors.js";
 
 
 class Middlewares {
-    private _tokensRepo: TokensRepository;
+    private _tokensRepo: TokensRepositoryImpl;
     constructor() {
-        this._tokensRepo = new TokensRepository();
+        this._tokensRepo = new TokensRepositoryImpl();
     }
 
     authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

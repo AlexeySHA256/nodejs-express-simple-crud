@@ -1,31 +1,34 @@
 import { Router } from "express";
-import { handlers as PostsHandlers, apiHandlers as PostsApiHandlers } from "./handlers.js";
+import { container } from "./main.js";
+
+const postsHandlers = container.handlers
+const postsApiHandlers = container.apiHandlers
 
 export const router = Router();
 
-router.get("/", PostsHandlers.listPosts);
-router.get("/detail/:id", PostsHandlers.getPost);
+router.get("/", postsHandlers.listPosts);
+router.get("/detail/:id", postsHandlers.getPost);
 
-router.get("/update/:id", PostsHandlers.updatePostGet);
-router.post("/update/:id", PostsHandlers.updatePost);
+router.get("/update/:id", postsHandlers.updatePostGet);
+router.post("/update/:id", postsHandlers.updatePost);
 
-router.get("/create", PostsHandlers.createPostGet);
-router.post("/create", PostsHandlers.createPost);
+router.get("/create", postsHandlers.createPostGet);
+router.post("/create", postsHandlers.createPost);
 
-router.get("/delete/:id", PostsHandlers.deletePostGet);
+router.get("/delete/:id", postsHandlers.deletePostGet);
 
-router.post("/delete/:id", PostsHandlers.deletePost);
+router.post("/delete/:id", postsHandlers.deletePost);
 
 export const apiRouter = Router();
 
-apiRouter.post("/create", PostsApiHandlers.createPost);
+apiRouter.post("/create", postsApiHandlers.createPost);
 
 const _commentsSubrouter = Router();
 apiRouter.use("/comments", _commentsSubrouter);
 
 // TODO: Подумать над тем, не лучше ли передавать id поста связанного с комментом в url вместо тела запроса
 
-_commentsSubrouter.post("/create", PostsApiHandlers.createComment)
-_commentsSubrouter.put("/update/:id", PostsApiHandlers.updateComment)
-_commentsSubrouter.get("/:id", PostsApiHandlers.getComment)
-_commentsSubrouter.delete("/delete/:id", PostsApiHandlers.deleteComment)
+_commentsSubrouter.post("/create", postsApiHandlers.createComment)
+_commentsSubrouter.put("/update/:id", postsApiHandlers.updateComment)
+_commentsSubrouter.get("/:id", postsApiHandlers.getComment)
+_commentsSubrouter.delete("/delete/:id", postsApiHandlers.deleteComment)

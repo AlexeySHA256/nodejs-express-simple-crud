@@ -1,7 +1,7 @@
 import { NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
 import TimeDuration from "../../core/timeDuration.js";
 import { serverUrl } from "../../server.js";
-import { TokensRepository, UsersRepository } from "../repository.js";
+import { TokensRepositoryImpl, TokensRepositoryI, UsersRepositoryImpl, UsersRepositoryI } from "../repository.js";
 import { Token, TokenScopes, User } from "./models.js";
 
 export class UserAlreadyExistsError extends Error {
@@ -22,24 +22,23 @@ export class ExpiredTokenError extends Error {
     }
 }
 
-interface Hasher {
+interface HasherI {
     hash(password: string): Promise<string>;
     compare(password: string, hashedPassword: string): Promise<boolean>;
 }
 
-interface MailProvider {
+interface MailProviderI {
     sendMail(to: string, subject: string, text: string): Promise<any>;
 }
 
 export class UsersService {
-    usersRepo: UsersRepository;
-    tokensRepo: TokensRepository;
-    private _hasher: Hasher;
-    private _mailer: MailProvider; 
-    constructor(hasher: Hasher, mailer: MailProvider) {
-        // TODO: Изолировать от прямого использования репозиториев, вместо этого использовать интерфейсы
-        this.usersRepo = new UsersRepository();
-        this.tokensRepo = new TokensRepository();
+    usersRepo: UsersRepositoryI;
+    tokensRepo: TokensRepositoryI;
+    private _hasher: HasherI;
+    private _mailer: MailProviderI; 
+    constructor(hasher: HasherI, mailer: MailProviderI, usersRepo: UsersRepositoryI, tokensRepo: TokensRepositoryI) {
+        this.usersRepo = usersRepo;
+        this.tokensRepo = tokensRepo;
         this._hasher = hasher;
         this._mailer = mailer;
     }
@@ -91,7 +90,8 @@ export class UsersService {
                     throw new Error('AUTHORIZATION_TOKEN_TTL is not defined');
                 }
                 const token = await this.tokensRepo.generateAndCreateToken(
-                    user.id, new TimeDuration(process.env.AUTHORIZATION_TOKEN_TTL).durationMs
+                    user.id, new TimeDuration(process.env.AUTHORIZATION_TOKEN_TTL).durationMs,
+                    TokenScopes.AUTHORIZATION
                 );
                 return token;
             }).catch((err) => {

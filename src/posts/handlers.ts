@@ -1,34 +1,46 @@
-import { PostsService, PostNotFoundError, CommentNotFoundError } from "./domain/service.js";
-import { CommentCreateForm, CommentUpdateForm, PostCreateForm, PostUpdateForm } from "./forms.js";
+import { PostNotFoundError, CommentNotFoundError, postData, commentData } from "./domain/service.js";
+import { CommentCreateForm, CommentUpdateForm, PostCreateForm, PostsListForm, PostUpdateForm } from "./forms.js";
 import validator from "validator";
 import { Request, Response } from "express";
-import { Post } from "./domain/models.js";
+import { Post, Comment } from "./domain/models.js";
 import { User } from "../users/domain/models.js";
+import { PostsRepositoryI } from "./repositories.js";
+import { UsersRepositoryI } from "../users/repository.js";
+import { Prisma } from "@prisma/client";
 
-class PostsHandlers {
-  private _service!: PostsService;
-  constructor() {
-    this._service = new PostsService();
+interface PostsServiceI {
+  listPosts: (page_size: number, page_num: number) => Promise<{ page_size: number, page_num: number, posts: Post[], pages_range: number, first_page_num: number, last_page_num: number, total_records: number }>;
+  getPost: (id: number) => Promise<Post>;
+  createPost: (postData: postData) => Promise<Post>;
+  updatePost: (id: number, postData: Partial<postData>) => Promise<Post>;
+  deletePost: (id: number) => Promise<void>;
+  getComment: (id: number) => Promise<Comment>;
+  createComment: (commentData: commentData) => Promise<Comment>;
+  updateComment: (id: number, commentData: Partial<commentData>) => Promise<Comment>;
+  deleteComment: (id: number) => Promise<void>;
+  postsRepo: PostsRepositoryI;
+  usersRepo: UsersRepositoryI;
+}
+
+export class PostsHandlers {
+  private _service: PostsServiceI;
+  constructor(service: PostsServiceI) {
+    this._service = service;
   }
 
   listPosts = (req: Request, res: Response) => {
-    req.query.page_num = req.query.page_num || "1";
-    req.query.page_size = req.query.page_size || "10";
-    const validationErrors: { [key: string]: string } = {}
-    if (!validator.isInt(String(req.query.page_num), { min: 1 })) {
-      validationErrors.page_num = "page_num must be an integer and greater than 0";
-    }
-    if (!validator.isInt(String(req.query.page_size), { min: 1 })) {
-      validationErrors.page_size = "page_size must be an integer and greater than 0";
+    const form = new PostsListForm(req.query);
+    if (!form.validate()) {
+      res.status(422).json({ errors: form.getErrors() });
+      return
     }
 
-    if (Object.keys(validationErrors).length > 0) {
-      res.status(422).json({ errors: validationErrors });
-      return;
-    }
+    req.query.page_num = req.query.page_num || "1";
+    req.query.page_size = req.query.page_size || "10";
+    
     this._service
       .listPosts(+req.query.page_size, +req.query.page_num)
-      .then((data: any) => res.render("posts/list", data))
+      .then((data) => res.render("posts/list", data))
       .catch((e: any) => res.status(500).json({ error: e }));
   };
 
@@ -39,7 +51,7 @@ class PostsHandlers {
     }
     this._service
       .getPost(+req.params.id)
-      .then((data) => res.render("posts/detail", data))
+      .then((post) => res.render("posts/detail", { post }))
       .catch((e) => {
         if (e instanceof PostNotFoundError) {
           res.status(404).send(`<h1>${e.message}</h1>`);
@@ -87,7 +99,7 @@ class PostsHandlers {
     }
     this._service
       .updatePost(+req.params.id, req.body)
-      .then((data) => res.redirect(`/posts/detail/${data.post.id}`))
+      .then((post) => res.redirect(`/posts/detail/${post.id}`))
       .catch((e) => res.status(500).json({ error: e }));
   };
 
@@ -111,7 +123,7 @@ class PostsHandlers {
     }
     this._service
       .createPost({ title: req.body.title, body: req.body.body, authorId: +req.body.author_id })
-      .then((data) => res.redirect(`/posts/detail/${data.post.id}`))
+      .then((post) => res.redirect(`/posts/detail/${post.id}`))
       .catch((e) => res.status(500).json({ error: e }));
   };
 
@@ -141,10 +153,10 @@ class PostsHandlers {
   };
 }
 
-class PostsApiHandlers {
-  private _service: PostsService;
-  constructor() {
-    this._service = new PostsService();
+export class PostsApiHandlers {
+  private _service: PostsServiceI;
+  constructor(service: PostsServiceI) {
+    this._service = service;
   }
 
   createPost = (req: Request, res: Response) => {
@@ -159,7 +171,7 @@ class PostsApiHandlers {
     }
     this._service
       .createPost({ ...req.body, authorId: req.user.id })
-      .then((result) => res.status(201).json(result))
+      .then((post) => res.status(201).json(post))
       .catch((e: Error) => res.status(500).json({ error: e }));
   };
 
@@ -175,7 +187,7 @@ class PostsApiHandlers {
     }
     this._service
       .createComment({ ...req.body, authorId: req.user.id })
-      .then((comment) => res.status(201).json(comment))
+      .then((comment) => res.status(201).json({ comment }))
       .catch((e: Error) => {
         if (e instanceof PostNotFoundError) {
           res.status(400).json({ error: e.message });
@@ -241,8 +253,4 @@ class PostsApiHandlers {
       });
   }
 }
-
-export const apiHandlers = new PostsApiHandlers();
-
-export const handlers = new PostsHandlers();
 

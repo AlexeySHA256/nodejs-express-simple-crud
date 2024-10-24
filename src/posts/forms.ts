@@ -74,6 +74,32 @@ const commentFieldsGenerator: fieldGenerators = {
   ),
 }
 
+export class PostsListForm extends BaseForm {
+  constructor(data?: { [key: string]: any }) {
+    const fields = [
+      new FormField('page_size', (value): validationOutput => {
+        if (!validator.isInt(String(value))) {
+          return 'Page size is not valid integer'
+        }
+        if (Number(value) < 1 || Number(value) > 50) {
+          return 'Page size should be between 1 and 50'
+        }
+        return null
+      }, false),
+      new FormField('page_num', (value): validationOutput => {
+        if (!validator.isInt(String(value))) {
+          return 'Page number is not valid integer'
+        }
+        if (Number(value) < 1) {
+          return 'Page number should be greater than 0'
+        }
+        return null
+      }, false)
+    ]
+    super(fields, data);
+  }
+}
+
 export class PostCreateForm extends BaseForm {
   constructor(data?: { [key: string]: any }) {
     super(Object.values(postFieldsGenerator).map((fieldGen) => fieldGen(true)), data);
