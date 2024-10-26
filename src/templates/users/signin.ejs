@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
+        <div class="bg-light border border-secondary p-3 rounded-2" style="width: 30rem;">
+            <h3 class="text-center">Sign in</h3>
+            <form class="d-flex flex-column align-items-center" method="post" id="signin-form">
+              <% form.fields.forEach(field => { %>
+                <div class="mb-3">
+                    <label for="<%= field.name %>" class="form-label"><%= field.name.charAt(0).toUpperCase() + field.name.slice(1) %>:
+                        <% if (field.isRequired) { %>
+                            <span class="text-danger">*</span>
+                        <% } %>
+                    </label>
+                    <% if (field.error) { %>
+                        <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control is-invalid" <% if (field.isRequired) { %> required <% } %> value="<%= field.value %>">
+                        <div class="invalid-feedback"><%= field.error %></div>
+                    <% } else { %>
+                        <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control" <% if (field.isRequired) { %> required <% } %> value="<%= field.value %>">
+                    <% } %>
+                </div>
+              <% }) %>
+                <button type="submit" class="btn btn-outline-success">Sign in</button>
+            </form>
+        </div>
+    </div>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/users/signin.js" type="module"></script>
+</body>
+</html>

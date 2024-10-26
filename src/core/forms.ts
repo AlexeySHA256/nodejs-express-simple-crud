@@ -4,29 +4,37 @@ type validationFuncT = (value: any) => validationOutput
 
 export type fieldGenerators = { [key: string]: (isRequired: boolean) => FormField }
 
+export enum htmlInputTypes {
+  TEXT = "text",
+  NUMBER = "number",
+  EMAIL = "email",
+  PASSWORD = "password",
+  CHECKBOX = "checkbox"
+}
+
 export class FormField {
   name: string;
   validationFunc: validationFuncT;
   error: string | null;
   value: any;
-  required: boolean = false;
+  isRequired: boolean = false;
+  htmlType: htmlInputTypes = htmlInputTypes.TEXT;
 
-  constructor(fieldName: string, validationFunc: validationFuncT, isRequired?: boolean) {
+  constructor(fieldName: string, validationFunc: validationFuncT, isRequired?: boolean, htmlType?: htmlInputTypes) {
     this.name = fieldName;
     this.validationFunc = validationFunc;
     this.error = null;
     this.value = null;
-    if (isRequired !== undefined) {
-      this.required = isRequired;
-    }
+    this.isRequired = isRequired !== undefined ? isRequired : this.isRequired;
+    this.htmlType = htmlType !== undefined ? htmlType : this.htmlType
   }
 
   validate() {
-    if (this.required) {
-      this.error = this.value ? this.validationFunc(this.value) : `${this.name} is required`;
-    } else {
-      this.error = this.value ? this.validationFunc(this.value) : null
+    let emptyValueError: string | null = null;
+    if (this.isRequired) {
+      emptyValueError = `${this.name} is required`;
     }
+    this.error = this.value ? this.validationFunc(this.value) : emptyValueError;
     return !this.error;
   }
 }

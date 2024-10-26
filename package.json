@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
-    "start": "node ./src/dist/server.js",
     "dev": "nodemon --exec node --loader ts-node/esm ./src/server.ts",
     "seed": "node --loader ts-node/esm ./src/db/seed.ts"
   },

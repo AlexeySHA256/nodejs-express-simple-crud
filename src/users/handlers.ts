@@ -11,7 +11,14 @@ interface UsersServiceI {
     activateUser(plainToken: string): Promise<User>
 }
 
-export default class UsersHandlers {
+export class UsersHandlers {
+    signInGet = (req: Request, res: Response) => {
+        const form = new UserLoginForm();
+        res.render("users/signin", { form });
+    }
+}
+
+export class UsersApiHandlers {
     private _service: UsersServiceI;
     constructor(service: UsersServiceI) {
         this._service = service
@@ -59,7 +66,10 @@ export default class UsersHandlers {
         }
         this._service
             .signIn(req.body.email, req.body.password)
-            .then((token) => res.json({ success: true, token: token.plainText, expiry: token.expiry }))
+            .then((token) => res.json({ success: true, token: {
+                text: token.plainText, 
+                expiry: token.expiry
+            } }))
             .catch((err: Error) => {
                 if (err instanceof InvalidCredentialsError) {
                     res.status(401).json({ success: false, error: err.message });

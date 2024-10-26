@@ -29,12 +29,16 @@
                         </div>
                     <% } else { %>
                         <div class="mb-3">
-                            <label for="<%= field.name %>" class="form-label"><%= field.name %>:<span class="text-danger">*</span></label>
+                            <label for="<%= field.name %>" class="form-label"><%= field.name.charAt(0).toUpperCase() + field.name.slice(1) %>:
+                                <% if (field.isRequired) { %>
+                                    <span class="text-danger">*</span>
+                                <% } %>
+                            </label>
                             <% if (field.error) { %>
-                                <input type="text" name="<%= field.name %>" class="form-control is-invalid" required value="<%= field.value %>">
+                                <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control is-invalid" required value="<%= field.value %>">
                                 <div class="invalid-feedback"><%= field.error %></div>
                             <% } else { %>
-                                <input type="text" name="<%= field.name %>" class="form-control" required value="<%= field.value %>">
+                                <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control" required value="<%= field.value %>">
                             <% } %>
                         </div>
                     <% } %>

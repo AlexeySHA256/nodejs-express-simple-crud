@@ -13,7 +13,9 @@
             <% form.fields.forEach(field => { %>
                 <% if (field.name === "author_id") { %>
                     <div class="mb-3">
-                        <label for="author_id" class="form-label">Author: <span class="text-danger">*</span></label>
+                        <label for="author_id" class="form-label">Author: <% if (field.isRequired) { %>
+                            <span class="text-danger">*</span>
+                        <% } %></label>
                         <select name="author_id" id="author_id" class="form-select <% if (field.error) { %>is-invalid<% } %>" required>
                             <% authors.forEach((author) => { %>
                                 <option 
@@ -28,12 +30,16 @@
                     </div>
                 <% } else { %>
                     <div class="mb-3">
-                        <label for="<%= field.name %>" class="form-label"><%= field.name %>:<span class="text-danger">*</span></label>
+                        <label for="<%= field.name %>" class="form-label"><%= field.name %>:
+                            <% if (field.isRequired) { %>
+                                <span class="text-danger">*</span>
+                            <% } %>
+                        </label>
                         <% if (field.error) { %>
-                            <input type="text" name="<%= field.name %>" class="form-control is-invalid" required value="<%= field.value %>">
+                            <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control is-invalid" required value="<%= field.value %>">
                             <div class="invalid-feedback"><%= field.error %></div>
                         <% } else { %>
-                            <input type="text" name="<%= field.name %>" class="form-control" required value="<%= field.value %>">
+                            <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control" required value="<%= field.value %>">
                         <% } %>
                     </div>
                 <% } %>

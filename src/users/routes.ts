@@ -1,12 +1,15 @@
 import { Router } from "express";
 import { container } from "./main.js";
  
-const router = Router();
-const usersHandlers = container.handlers
+export const usersRouter = Router();
+export const usersApiRouter = Router();
 
-router.get("/list", usersHandlers.listUsers);
-router.post("/signup", usersHandlers.signUp);
-router.post("/signin", usersHandlers.signIn);
-router.put("/activate", usersHandlers.activateUser);
+const handlers = container.handlers
+const apiHandlers = container.apiHandlers
 
-export default router
+usersApiRouter.get("/list", apiHandlers.listUsers);
+usersApiRouter.post("/signup", apiHandlers.signUp);
+usersApiRouter.post("/signin", apiHandlers.signIn);
+usersApiRouter.put("/activate", apiHandlers.activateUser);
+
+usersRouter.get("/signin", handlers.signInGet);

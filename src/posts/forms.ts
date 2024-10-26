@@ -1,4 +1,4 @@
-import { BaseForm, fieldGenerators, FormField, validationOutput } from "../core/forms.js";
+import { BaseForm, fieldGenerators, FormField, htmlInputTypes, validationOutput } from "../core/forms.js";
 import validator from "validator";
 
 const postFieldsGenerator: fieldGenerators = {
@@ -70,7 +70,8 @@ const commentFieldsGenerator: fieldGenerators = {
       }
       return null
     },
-    isRequired
+    isRequired,
+    htmlInputTypes.NUMBER
   ),
 }
 
