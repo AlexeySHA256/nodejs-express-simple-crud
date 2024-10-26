@@ -22,6 +22,7 @@ export class Comment {
     id;
     title;
     content;
+    imageUrl;
     authorId;
     postId;
     post;

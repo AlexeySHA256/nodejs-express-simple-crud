@@ -5,6 +5,7 @@ import { configDotenv } from "dotenv";
 import path from "path";
 import cors from "cors";
 import middlewares from "./core/middlewares.js";
+import cookieParser from "cookie-parser";
 
 console.log("Config loaded", configDotenv());
 
@@ -16,6 +17,7 @@ app.set("views", path.resolve(path.join(import.meta.dirname, "templates")));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(
   "/static/",

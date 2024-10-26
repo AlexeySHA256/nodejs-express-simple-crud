@@ -33,6 +33,7 @@ export class Comment {
     id!: number;
     title!: string;
     content!: string;
+    imageUrl!: string | null;
     authorId!: number;
     postId!: number;
     post?: Post;
@@ -41,7 +42,7 @@ export class Comment {
     updatedAt!: Date;
 
     constructor(
-        data: {id: number, title: string, content: string, authorId: number, postId: number,
+        data: {id: number, title: string, content: string, imageUrl: string | null, authorId: number, postId: number,
         post?: Post, author?: User, createdAt: Date, updatedAt: Date}
     ) {
         Object.assign(this, data);

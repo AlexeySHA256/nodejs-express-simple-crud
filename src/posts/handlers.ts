@@ -85,6 +85,7 @@ export class PostsHandlers {
           res.status(404).send(`<h1>${e.message}</h1>`);
           return
         }
+        console.log(e);
         res.status(500).json({ error: e });
       });
   };
