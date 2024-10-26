@@ -34,7 +34,7 @@ export class UserCreateForm extends BaseForm {
                 return "Passwords do not match";
             }
             return null;
-        }, true));
+        }, true, htmlInputTypes.PASSWORD));
         super(fields, data);
     }
 }

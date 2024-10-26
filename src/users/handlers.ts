@@ -16,6 +16,11 @@ export class UsersHandlers {
         const form = new UserLoginForm();
         res.render("users/signin", { form });
     }
+
+    signUpGet = (req: Request, res: Response) => {
+        const form = new UserCreateForm();
+        res.render("users/signup", { form });
+    }
 }
 
 export class UsersApiHandlers {

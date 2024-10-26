@@ -1,12 +1,13 @@
 import { createToast, MsgLevels } from "../toast.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("signin-form");
+    const form = document.getElementById("signup-form");
     form?.addEventListener("submit", (event) => {
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const data = new FormData(form);
-        fetch(window.location.origin + "/api/v1/users/signin", {
+        const addError = (msg: string, title: string = "Error") => createToast(msg, MsgLevels.DANGER, title);
+        fetch(window.location.origin + "/api/v1/users/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -17,20 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .then((data) => {
                 console.log("Success:", data?.success, "Data", data);
                 if (data.error) {
-                    createToast(data.error, MsgLevels.DANGER, "Error");
-                    return;
+                    addError(String(data.error))
                 } else if (data.errors) {
-                    Object.entries(data.errors).forEach(([key, value]) => {
-                        createToast(String(value), MsgLevels.DANGER, "Error");
-                    });
-                    return;
+                    Object.entries(data.errors).forEach(([key, value]) => addError(String(value), key));
+                } else {
+                    createToast("You've successfully created an account, to login you should activate your account by following the instructions sent to your email", MsgLevels.SUCCESS, "Account created");
                 }
-                document.cookie = `token=${data.token.text}; path=/; max-age=${data.token.expiry}`
-                window.location.href = "/";
             })
             .catch((error) => {
                 console.error("Error:", error);
-                createToast("Unexpected error, please try again later", MsgLevels.DANGER, "Error");
+                addError("Unexpected error, please try again later");
             });
     });
 })

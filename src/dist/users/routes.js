@@ -9,4 +9,5 @@ usersApiRouter.post("/signup", apiHandlers.signUp);
 usersApiRouter.post("/signin", apiHandlers.signIn);
 usersApiRouter.put("/activate", apiHandlers.activateUser);
 usersRouter.get("/signin", handlers.signInGet);
+usersRouter.get("/signup", handlers.signUpGet);
 //# sourceMappingURL=routes.js.map

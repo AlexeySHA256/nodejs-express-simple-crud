@@ -6,6 +6,10 @@ export class UsersHandlers {
         const form = new UserLoginForm();
         res.render("users/signin", { form });
     };
+    signUpGet = (req, res) => {
+        const form = new UserCreateForm();
+        res.render("users/signup", { form });
+    };
 }
 export class UsersApiHandlers {
     _service;

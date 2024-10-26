@@ -40,6 +40,7 @@ class Middlewares {
                 return;
             }
             req.user = token.user;
+            next();
         })
             .catch((err) => {
             if (err instanceof NotFoundError) {
@@ -49,8 +50,7 @@ class Middlewares {
             else {
                 res.status(500).json({ success: false, error: "Internal server error" });
             }
-        })
-            .finally(() => next());
+        });
     };
     requireAuthenticated = (actionOnFail) => {
         return (req, res, next) => {

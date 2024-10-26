@@ -69,7 +69,8 @@ export class UserCreateForm extends BaseForm {
           }
           return null;
         },
-        true
+        true,
+        htmlInputTypes.PASSWORD
       )
     );
     super(fields, data);
