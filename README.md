@@ -24,11 +24,7 @@ It's a simple nodejs project made using framework express.js with basic crud ope
   ```bash
   docker compose up --build
   ```
-5. Add database relations
+5. Run migrations
   ```bash 
-  docker exec -it dates_db psql -U postgres
-  ```
-6. Create database relations and fill it with test data:
-  ```bash
-  python db.py postgres://postgres:postgres@localhost:5432/postgres
+  docker exec nodejscrud-app 'npx prisma migrate dev'
   ```
