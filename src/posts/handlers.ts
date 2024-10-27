@@ -113,10 +113,6 @@ export class PostsHandlers {
   };
 
   createPost = (req: Request, res: Response) => {
-    if (!req.user) {
-      res.redirect("/users/login");
-      return
-    }
     const form = new PostCreateForm(req.body);
     if (!form.validate()) {
       return this._service.usersRepo.listUsers(100)
@@ -161,33 +157,25 @@ export class PostsApiHandlers {
   }
 
   createPost = (req: Request, res: Response) => {
-    if (!req.user) {
-      res.status(401).json({ error: "unauthorized" });
-      return
-    }
     const form = new PostCreateForm(req.body);
     if (!form.validate()) {
       res.status(422).json({ errors: form.getErrors() });
       return
     }
     this._service
-      .createPost({ ...req.body, authorId: req.user.id })
+      .createPost({ ...req.body, authorId: (res.locals.user as User).id })
       .then((post) => res.status(201).json(post))
       .catch((e: Error) => res.status(500).json({ error: e }));
   };
 
   createComment = (req: Request, res: Response) => {
-    if (!req.user) {
-      res.status(401).json({ error: "unauthorized" });
-      return
-    }
     const form = new CommentCreateForm(req.body);
     if (!form.validate()) {
       res.status(422).json({ errors: form.getErrors() });
       return
     }
     this._service
-      .createComment({ ...req.body, authorId: req.user.id })
+      .createComment({ ...req.body, authorId:( res.locals.user as User).id })
       .then((comment) => res.status(201).json({ comment }))
       .catch((e: Error) => {
         if (e instanceof PostNotFoundError) {

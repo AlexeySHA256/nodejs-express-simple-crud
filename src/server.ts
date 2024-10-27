@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 app.use(
   "/static/",
-  express.static(path.resolve(path.join(import.meta.dirname, "dist", "static")))
+  express.static(path.resolve(path.join(import.meta.dirname, "..", "dist", "static")))
 );
 
 app.use("/bootstrap", express.static(path.join(import.meta.dirname, "..", "node_modules", "bootstrap", "dist")));

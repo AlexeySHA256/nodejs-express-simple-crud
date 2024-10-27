@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { TokensRepositoryImpl, UsersRepositoryImpl } from "../users/repository.js";
-import { Token, TokenScopes, UserRoles } from "../users/domain/models.js";
+import { Token, TokenScopes, User, UserRoles } from "../users/domain/models.js";
 import { NotFoundError } from "./repositoryErrors.js";
 
 export enum unauthenticatedActions {
@@ -51,7 +51,7 @@ class Middlewares {
                     }
                     return
                 }  
-                req.user = token.user;
+                res.locals.user = token.user
                 next()
             })
             .catch((err) => {
@@ -66,7 +66,7 @@ class Middlewares {
 
     requireAuthenticated = (actionOnFail: unauthenticatedActions): middlewareFunc => {
         return (req: Request, res: Response, next: NextFunction) => {
-            if (!req.user) {
+            if (!res.locals.user) {
                 switch (actionOnFail) {
                     case unauthenticatedActions.REDIRECT_TO_LOGIN:
                         return res.redirect("/users/signin");
@@ -81,11 +81,10 @@ class Middlewares {
     requireRole = (role: UserRoles, unauthenticatedAction: unauthenticatedActions = unauthenticatedActions.JSON_ERROR): middlewareFunc => {
         return (req: Request, res: Response, next: NextFunction) => {
             this.requireAuthenticated(unauthenticatedAction)(req, res, () => {
-                if (req.user) {
-                    if (req.user.role !== role) {
-                        res.status(403).json({ success: false, error: "Forbidden" });
-                        return
-                    }
+                const user = res.locals.user;
+                if (user && (user as User).role !== role) {
+                    res.status(403).json({ success: false, error: "Forbidden" });
+                    return
                 }
                 next()
             });
