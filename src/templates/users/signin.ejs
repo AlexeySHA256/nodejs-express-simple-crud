@@ -12,19 +12,7 @@
             <h3 class="text-center">Sign in</h3>
             <form class="d-flex flex-column align-items-center" method="post" id="signin-form">
               <% form.fields.forEach(field => { %>
-                <div class="mb-3">
-                    <label for="<%= field.name %>" class="form-label"><%= field.name.charAt(0).toUpperCase() + field.name.slice(1) %>:
-                        <% if (field.isRequired) { %>
-                            <span class="text-danger">*</span>
-                        <% } %>
-                    </label>
-                    <% if (field.error) { %>
-                        <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control is-invalid" <% if (field.isRequired) { %> required <% } %> value="<%= field.value %>">
-                        <div class="invalid-feedback"><%= field.error %></div>
-                    <% } else { %>
-                        <input type="<%= field.htmlType %>" name="<%= field.name %>" class="form-control" <% if (field.isRequired) { %> required <% } %> value="<%= field.value %>">
-                    <% } %>
-                </div>
+                <%- include('../includes/form-field.ejs', { field: field }) %>
               <% }) %>
                 <button type="submit" class="btn btn-outline-success">Sign in</button>
             </form>

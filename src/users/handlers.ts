@@ -21,6 +21,11 @@ export class UsersHandlers {
         const form = new UserCreateForm();
         res.render("users/signup", { form });
     }
+
+    activateUserGet = (req: Request, res: Response) => {
+        const form = new ActivateUserForm();
+        res.render("users/activate", { form });
+    }
 }
 
 export class UsersApiHandlers {

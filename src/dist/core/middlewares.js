@@ -36,7 +36,16 @@ class Middlewares {
         this._tokensRepo.getToken({ hash: tokenHash, scope: TokenScopes.AUTHORIZATION, withUser: true })
             .then((token) => {
             if (token.isExpired()) {
-                unathorized("Your token expired, can't authenticate");
+                console.log('token expired', 'plaintext', plainToken);
+                // if token comes from cookie, just remove it
+                if (plainToken === cookieToken) {
+                    console.log('clearing cookie with expired token', 'plaintext', plainToken);
+                    res.clearCookie("token");
+                    next();
+                }
+                else {
+                    unathorized("Your token expired, can't authenticate");
+                }
                 return;
             }
             req.user = token.user;

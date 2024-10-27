@@ -56,14 +56,14 @@ export class UsersService {
                         throw new Error('ACTIVATION_TOKEN_TTL is not defined');
                     }
                     const activationToken = await this.tokensRepo.generateAndCreateToken(id, new TimeDuration(process.env.ACTIVATION_TOKEN_TTL).durationMs, TokenScopes.ACTIVATION);
-                    const activationUrl = `${serverUrl}/api/v1/users/activate/`;
+                    const activationPage = `${serverUrl}/users/activate/`;
                     await this._mailer.sendMail(
                         email,
                         "Welcome to NodeJSCrud API!",
                         `Hello, ${fullName}! You have successfully signed up for NodeJSCrud API.
-                        Please send request with your token to url below to activate your account:
-                        "PUT '${activationUrl}'"
-                        Your activation token is: ${activationToken.plainText}`
+                        Follow the link below to activate your account: ${activationPage},
+                        and enter the following token:
+                        ${activationToken.plainText}`
                     );
                     return user;
                 })

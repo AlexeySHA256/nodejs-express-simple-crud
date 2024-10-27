@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Activate account</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
-        <div class="bg-light-subtle border border-primary-subtle p-3 rounded-2" style="width: 30rem;">
-            <h3 class="text-center">Sign Up</h3>
-            <form class="d-flex flex-column align-items-center" method="post" id="signup-form">
+        <div class="bg-light border border-secondary p-3 rounded-2" style="width: 30rem;">
+            <h3 class="text-center">Type your activation code in the field below to activate your account</h3>
+            <form class="d-flex flex-column align-items-center" method="post" id="activation-form">
               <% form.fields.forEach(field => { %>
                 <%- include('../includes/form-field.ejs', { field: field }) %>
               <% }) %>
-                <button type="submit" class="btn btn-outline-success">Sign Up</button>
+                <button type="submit" class="btn btn-outline-success">Activate</button>
             </form>
         </div>
     </div>
     <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/users/signup.js" type="module"></script>
+    <script src="/static/users/activate.js" type="module"></script>
 </body>
 </html>
