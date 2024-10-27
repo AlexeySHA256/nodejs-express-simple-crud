@@ -10,7 +10,7 @@ import {
   prisma,
   UniqueViolationErrCode,
 } from "../db/prisma.js";
-import { User } from "../users/domain/models.js";
+import { User, UserRoles } from "../users/domain/models.js";
 import { Comment as CommentP, Prisma } from "@prisma/client";
 
 export interface PostsRepositoryI {
@@ -48,7 +48,7 @@ export class PostsRepositoryImpl {
         take: limit,
         skip: offset,
       })
-      .then((posts) => posts.map((post) => Post.fromObject(post)));
+      .then((posts) => posts.map((post) => new Post(post)));
   }
 
   async getPost(options: {
@@ -70,15 +70,15 @@ export class PostsRepositoryImpl {
         },
       })
       .then((post) => {
-        return Post.fromObject({
+        return new Post({
           ...post,
-          author: post.author ? User.fromObject(post.author) : undefined,
+          author: post.author ? new User({ ...post.author, role: post.author.role as UserRoles }) : undefined,
           comments: post.comments
             ? post.comments.map(
                 (comment) =>
                   new Comment({
                     ...comment,
-                    author: User.fromObject(
+                    author: new User(
                       (comment as Comment).author as User
                     ),
                   })
@@ -103,7 +103,7 @@ export class PostsRepositoryImpl {
   ): Promise<Post> {
     return prisma.post
       .update({ where: { id }, data })
-      .then((post) => Post.fromObject(post))
+      .then((post) => new Post(post))
       .catch((err) => {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -122,7 +122,7 @@ export class PostsRepositoryImpl {
   ): Promise<Post> {
     return prisma.post
       .create({ data: { title, body, authorId } })
-      .then((post) => Post.fromObject(post))
+      .then((post) => new Post(post))
       .catch((err) => {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&

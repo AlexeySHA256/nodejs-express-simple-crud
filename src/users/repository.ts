@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { NotFoundErrCode, prisma, UniqueViolationErrCode } from "../db/prisma.js";
-import { Token, TokenScopes, User } from "./domain/models.js";
+import { Token, TokenScopes, User, UserRoles } from "./domain/models.js";
 import { NotFoundError, UniqueViolationError } from "../core/repositoryErrors.js";
 
 export interface UsersRepositoryI {
@@ -22,7 +22,7 @@ export class UsersRepositoryImpl {
             options.take = limit;
         }
         return prisma.user.findMany(options)
-            .then((users) => users.map((user) => User.fromObject(user)));
+            .then((users) => users.map((user) => new User({ ...user, role: user.role as UserRoles })));
     }
 
     async getUser(options: { id?: number, email?: string }): Promise<User> {
@@ -31,7 +31,7 @@ export class UsersRepositoryImpl {
         }
         const condition = options.id ? { id: options.id } : { email: options.email };
         return prisma.user.findUniqueOrThrow({ where: condition })
-            .then((user) => User.fromObject(user))
+            .then((user) => new User({ ...user, role: user.role as UserRoles }))
             .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
                     throw new NotFoundError("User with this email wasn't found");
@@ -49,7 +49,7 @@ export class UsersRepositoryImpl {
                 passwordHash,
             },
         })
-           .then((user) => User.fromObject(user))
+           .then((user) => new User({ ...user, role: user.role as UserRoles }))
            .catch((err) => {
                if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === UniqueViolationErrCode) {
                    throw new UniqueViolationError("User with this email already exists");
@@ -60,7 +60,7 @@ export class UsersRepositoryImpl {
 
     async updateUser(id: number, data: Prisma.UserUpdateInput): Promise<User> {
         return prisma.user.update({ where: { id }, data })
-            .then((user) => User.fromObject(user))
+            .then((user) => new User({ ...user, role: user.role as UserRoles }))
             .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError) {
                     switch (err.code) {
@@ -94,7 +94,7 @@ export class TokensRepositoryImpl {
             options.withUser = false;
         }
         return prisma.token.findUniqueOrThrow({ where: { hash: options.hash, scope: options.scope }, include: { user: options.withUser } })
-            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: User.fromObject(token.user), plainText: "" }))
+            .then((token) => new Token({ ...token, scope: token.scope as TokenScopes, user: new User({ ...token.user, role: token.user.role as UserRoles    }), plainText: "" }))
             .catch((err) => {
                 if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === NotFoundErrCode) {
                     throw new NotFoundError("Token not found");

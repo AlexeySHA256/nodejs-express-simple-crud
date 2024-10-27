@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { container } from "./main.js";
 import middlewares, { unauthenticatedActions } from "../core/middlewares.js";
+import { UserRoles } from "../users/domain/models.js";
 
 const handlers = container.handlers
 const apiHandlers = container.apiHandlers
@@ -15,8 +16,8 @@ postsRouter.get("/detail/:id", handlers.getPost);
 postsRouter.get("/update/:id", authRequiredWithRedirect, handlers.updatePostGet);
 postsRouter.post("/update/:id", authRequiredWithRedirect, handlers.updatePost);
 
-postsRouter.get("/create", authRequiredWithRedirect, handlers.createPostGet);
-postsRouter.post("/create", authRequiredWithRedirect, handlers.createPost);
+postsRouter.get("/create", middlewares.requireRole(UserRoles.ADMIN, unauthenticatedActions.REDIRECT_TO_LOGIN), handlers.createPostGet);
+postsRouter.post("/create", middlewares.requireRole(UserRoles.ADMIN, unauthenticatedActions.REDIRECT_TO_LOGIN), handlers.createPost);
 
 postsRouter.get("/delete/:id", authRequiredWithRedirect, handlers.deletePostGet);
 

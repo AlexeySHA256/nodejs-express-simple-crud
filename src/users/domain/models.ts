@@ -1,23 +1,26 @@
 import { Post } from "../../posts/domain/models.js";
 import crypto_ from "crypto";
 
+export enum UserRoles {
+    USER = "USER",
+    ADMIN = "ADMIN",
+    DEV = "DEV"
+}
+
 export class User {
     id!: number;
     firstName!: string;
     lastName!: string;
     email!: string;
+    role: UserRoles = UserRoles.USER;
     posts?: Post[];
     isActive!: boolean;
     passwordHash!: string;
     createdAt!: Date;
     updatedAt!: Date;
 
-    constructor(id: number, firstName: string, lastName: string, email: string, passwordHash: string, isActive: boolean, createdAt: Date, updatedAt: Date, posts?: Post[]) {
-        Object.assign(this, { id, firstName, lastName, email, posts, passwordHash, isActive, createdAt, updatedAt });
-    }
-
-    static fromObject(obj: { id: number, firstName: string, lastName: string, email: string, isActive: boolean, posts?: Post[], passwordHash: string, createdAt: Date, updatedAt: Date }): User {
-        return new User(obj.id, obj.firstName, obj.lastName, obj.email, obj.passwordHash, obj.isActive, obj.createdAt, obj.updatedAt, obj.posts);
+    constructor(obj: { id: number, firstName: string, lastName: string, email: string, role: UserRoles, isActive: boolean, posts?: Post[], passwordHash: string, createdAt: Date, updatedAt: Date }) {
+        Object.assign(this, obj);
     }
 
     get fullName(): string {
