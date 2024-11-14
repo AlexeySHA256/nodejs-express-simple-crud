@@ -9,7 +9,7 @@ export class Post {
     body!: string;
     authorId!: number;
     author?: User;
-    comments!: Comment[];
+    comments?: Comment[];
     createdAt!: Date;
     updatedAt!: Date;
 

@@ -11,38 +11,15 @@ import {
   UniqueViolationErrCode,
 } from "../db/prisma.js";
 import { User, UserRoles } from "../users/domain/models.js";
-import { Comment as CommentP, Prisma } from "@prisma/client";
-
-export interface PostsRepositoryI {
-  countPosts(): Promise<number>;
-  listPosts(limit: number, offset: number): Promise<Post[]>;
-  getPost(options: {
-    id: number;
-    withAuthor?: boolean;
-    withComments?: boolean;
-  }): Promise<Post>;
-  updatePost(id: number, data: Prisma.PostUncheckedCreateInput): Promise<Post>;
-  deletePost(id: number): Promise<void>;
-  createPost(title: string, body: string, authorId: number): Promise<Post>;
-}
-
-export interface CommentsRepositoryI {
-  createComment(data: Prisma.CommentUncheckedCreateInput): Promise<CommentP>;
-  getComment(options: {
-    id: number;
-    withAuthor?: boolean;
-    withPost?: boolean;
-  }): Promise<CommentP>;
-  updateComment(id: number, data: Prisma.CommentUpdateInput): Promise<CommentP>;
-  deleteComment(id: number): Promise<void>;
-}
+import { Prisma } from "@prisma/client";
+import { CommentCreateData, PostCreateData } from "./domain/interfaces.js";
 
 export class PostsRepositoryImpl {
   async countPosts(): Promise<number> {
     return prisma.post.count();
   }
 
-  async listPosts(limit: number, offset: number): Promise<Post[]> {
+  async paginatedListPosts(limit: number, offset: number): Promise<Post[]> {
     return prisma.post
       .findMany({
         take: limit,
@@ -64,23 +41,21 @@ export class PostsRepositoryImpl {
         where: { id: options.id },
         include: {
           author: withAuthor,
-          comments: withComments
-            ? { include: { author: true } }
-            : undefined,
+          comments: withComments ? { include: { author: true } } : undefined,
         },
       })
       .then((post) => {
         return new Post({
           ...post,
-          author: post.author ? new User({ ...post.author, role: post.author.role as UserRoles }) : undefined,
+          author: post.author
+            ? new User({ ...post.author, role: post.author.role as UserRoles })
+            : undefined,
           comments: post.comments
             ? post.comments.map(
                 (comment) =>
                   new Comment({
                     ...comment,
-                    author: new User(
-                      (comment as Comment).author as User
-                    ),
+                    author: new User((comment as Comment).author as User),
                   })
               )
             : [],
@@ -97,12 +72,12 @@ export class PostsRepositoryImpl {
       });
   }
 
-  async updatePost(
-    id: number,
-    data: Prisma.PostUncheckedCreateInput
-  ): Promise<Post> {
+  async updatePost(id: number, data: Post): Promise<Post> {
     return prisma.post
-      .update({ where: { id }, data })
+      .update({
+        where: { id },
+        data: { title: data.title, body: data.body, authorId: data.authorId },
+      })
       .then((post) => new Post(post))
       .catch((err) => {
         if (
@@ -115,13 +90,9 @@ export class PostsRepositoryImpl {
       });
   }
 
-  async createPost(
-    title: string,
-    body: string,
-    authorId: number
-  ): Promise<Post> {
+  async createPost(data: PostCreateData): Promise<Post> {
     return prisma.post
-      .create({ data: { title, body, authorId } })
+      .create({ data })
       .then((post) => new Post(post))
       .catch((err) => {
         if (
@@ -129,7 +100,7 @@ export class PostsRepositoryImpl {
           err.code === UniqueViolationErrCode
         ) {
           throw new UniqueViolationError(
-            `Post with title ${title} already exists.`
+            `Post with title ${data.title} already exists.`
           );
         }
         throw err;
@@ -150,9 +121,7 @@ export class PostsRepositoryImpl {
 }
 
 export class CommentsRepositoryImpl {
-  async createComment(
-    data: Prisma.CommentUncheckedCreateInput
-  ): Promise<CommentP> {
+  async createComment(data: CommentCreateData): Promise<Comment> {
     return prisma.comment.create({ data }).catch((err) => {
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -168,7 +137,7 @@ export class CommentsRepositoryImpl {
     id: number;
     withAuthor?: boolean;
     withPost?: boolean;
-  }): Promise<CommentP> {
+  }): Promise<Comment> {
     if (options.withAuthor === undefined) {
       options.withAuthor = false;
     }
@@ -180,6 +149,15 @@ export class CommentsRepositoryImpl {
         where: { id: options.id },
         include: { author: options.withAuthor, post: options.withPost },
       })
+      .then(
+        (comment) =>
+          new Comment({
+            ...comment,
+            author: comment.author
+              ? new User(comment.author as User)
+              : undefined,
+          })
+      )
       .catch((err) => {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -193,19 +171,32 @@ export class CommentsRepositoryImpl {
       });
   }
 
-  async updateComment(
-    id: number,
-    data: Prisma.CommentUpdateInput
-  ): Promise<CommentP> {
-    return prisma.comment.update({ where: { id }, data }).catch((err) => {
-      if (
-        err instanceof Prisma.PrismaClientKnownRequestError &&
-        err.code === NotFoundErrCode
-      ) {
-        throw new NotFoundError(`Comment with id ${id} does not exist`);
-      }
-      throw err;
-    });
+  async listComments(filters: { [key: string]: string }): Promise<Comment[]> {
+    return prisma.comment.findMany({
+      where: filters,
+      include: { author: true },
+    }).then((comments) => comments.map((comment) => new Comment({...comment, author: new User(comment.author as User)})));
+  }
+
+  async updateComment(id: number, data: Comment): Promise<Comment> {
+    return prisma.comment
+      .update({
+        where: { id },
+        data: {
+          title: data.title,
+          content: data.content,
+          imageUrl: data.imageUrl,
+        },
+      })
+      .catch((err) => {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === NotFoundErrCode
+        ) {
+          throw new NotFoundError(`Comment with id ${id} does not exist`);
+        }
+        throw err;
+      });
   }
 
   async deleteComment(id: number): Promise<void> {
