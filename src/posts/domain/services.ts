@@ -1,16 +1,13 @@
 import { ForeignKeyViolationError, NotFoundError, UniqueViolationError } from "../../core/repositoryErrors.js";
-import { Post, Comment } from "./models.js";
 import { UsersStorageI } from "../../users/domain/interfaces.js";
-import { PostsStorageI, CommentsStorageI, CommentCreateData, PostCreateData } from "./interfaces.js";
+import { PostsStorageI, CommentsStorageI, PostCreateData, IPostCreateData, IComment, ICommentExtended, ICommentCreateData, IPost, IPostExtended } from "./interfaces.js";
+import { IPaginatedData } from "../../../types/types.js";
 
-export type postData = { title: string, body: string, authorId: number};
-export type commentData = { title: string, content: string, authorId: number, postId: number, imageUrl?: string };
+export class PostNotFoundError extends Error { }
 
-export class PostNotFoundError extends Error {}
+export class PostAlreadyExistsError extends Error { }
 
-export class PostAlreadyExistsError extends Error {}
-
-export class CommentNotFoundError extends Error {}
+export class CommentNotFoundError extends Error { }
 
 export class PostsService {
   constructor(public postsRepo: PostsStorageI, public usersRepo: UsersStorageI) {
@@ -18,15 +15,15 @@ export class PostsService {
     this.usersRepo = usersRepo;
   }
 
-  async listPosts(page_size: number, page_num: number): Promise<{ page_size: number, page_num: number, posts: Post[], pages_range: number, first_page_num: number, last_page_num: number, total_records: number }> {
+  async listPosts(page_size: number, page_num: number): Promise<IPaginatedData<IPost>> {
     return this.postsRepo.paginatedListPosts(page_size, page_num).then(async (posts) => {
       return this.postsRepo.countPosts().then((count) => {
-        return { page_size, page_num, posts, pages_range: 5, first_page_num: 1, last_page_num: Math.ceil(count / page_size), total_records: count};
+        return { page_size, page_num, data: posts, pages_range: 5, first_page_num: 1, last_page_num: Math.ceil(count / page_size), total_records: count };
       })
     });
   }
 
-  async getPost(id: number): Promise<Post> {
+  async getPost(id: number): Promise<IPostExtended> {
     return this.postsRepo
       .getPost({ id, withAuthor: true, withComments: true })
       .catch((err) => {
@@ -37,16 +34,16 @@ export class PostsService {
       });
   }
 
-  async updatePost(id: number, postData: Partial<postData>): Promise<Post> {
+  async updatePost(id: number, postData: Partial<IPostCreateData>): Promise<IPost> {
     return this.postsRepo
       .getPost({ id })
-      .then(async (post: Post) => {
-        const updatedPost = new Post({
+      .then(async (post: IPost) => {
+        const updatedPost = {
           ...post,
           title: postData.title || post.title,
           body: postData.body || post.body,
           authorId: postData.authorId || post.authorId,
-        })
+        }
         return this.postsRepo.updatePost(id, updatedPost)
       })
       .catch((err) => {
@@ -57,7 +54,7 @@ export class PostsService {
       });
   }
 
-  async createPost(data: PostCreateData): Promise<Post> {
+  async createPost(data: PostCreateData): Promise<IPost> {
     return this.postsRepo.createPost(data)
       .catch((err) => {
         if (err instanceof UniqueViolationError) {
@@ -83,7 +80,7 @@ export class CommentsService {
   constructor(public commentsRepo: CommentsStorageI) {
     this.commentsRepo = commentsRepo;
   }
-  async createComment(data: CommentCreateData): Promise<Comment> {
+  async createComment(data: ICommentCreateData): Promise<IComment> {
     return this.commentsRepo.createComment(data)
       .catch((err) => {
         if (err instanceof ForeignKeyViolationError) {
@@ -93,9 +90,9 @@ export class CommentsService {
       })
   }
 
-  async getComment(id: number): Promise<Comment> {
+  async getComment(id: number): Promise<ICommentExtended> {
     return this.commentsRepo.getComment({ id, withAuthor: true, withPost: true })
-     .catch((err) => {
+      .catch((err) => {
         if (err instanceof NotFoundError) {
           throw new CommentNotFoundError(`Comment with id ${id} does not exist`);
         }
@@ -103,24 +100,23 @@ export class CommentsService {
       })
   }
 
-  async listCommentsForPost(postId: number): Promise<Comment[]> {
-    // try to get post by given id, to check if it exists
+  async listCommentsForPost(postId: number): Promise<IComment[]> {
     return this.commentsRepo.listComments({ postId })
   }
 
-  async updateComment(id: number, data: Partial<commentData>): Promise<Comment> {
+  async updateComment(id: number, data: Partial<ICommentCreateData>): Promise<IComment> {
     return this.commentsRepo.getComment({ id })
-     .then(async (comment) => {
+      .then(async (comment) => {
         const updatedComment = {
           ...comment,
-          title: (data.title || comment.title) as string,
-          content: (data.content || comment.content) as string,
-          postId: (data.postId || comment.postId) as number,
-          imageUrl: (data.imageUrl || comment.imageUrl) as string
+          title: (data.title || comment.title),
+          content: (data.content || comment.content),
+          postId: (data.postId || comment.postId),
+          imageUrl: (data.imageUrl || comment.imageUrl)
         };
         return await this.commentsRepo.updateComment(id, updatedComment)
       })
-     .catch((err) => {
+      .catch((err) => {
         if (err instanceof NotFoundError) {
           throw new CommentNotFoundError(`Comment with id ${id} does not exist`);
         }

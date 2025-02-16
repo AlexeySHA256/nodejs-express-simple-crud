@@ -71,8 +71,8 @@ export class BaseForm {
     this._isValid = false;
   }
 
-  getErrors(): {[key: string]: string | string[]} {
-    const errors: {[key: string]: string | string[]} = {};
+  getErrors(): { [key: string]: string | string[] } {
+    const errors: { [key: string]: string | string[] } = {};
     this.fields.forEach((field) => {
       if (field.error) {
         errors[field.name] = field.error;

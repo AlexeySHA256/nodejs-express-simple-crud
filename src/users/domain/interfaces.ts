@@ -1,6 +1,10 @@
-import { Token, TokenScopes, User } from "./models.js";
+import { Prisma } from "@prisma/client";
+import { Token, TokenScopes } from "./models.js";
 
-export interface UserCreateData {
+export type IUser = Prisma.UserGetPayload<{}>
+export type IToken = Prisma.TokenGetPayload<{}>
+
+export interface IUserCreateData {
     firstName: string;
     lastName: string;
     email: string;
@@ -8,10 +12,10 @@ export interface UserCreateData {
 }
 
 export interface UsersStorageI {
-    listUsers(limit?: number): Promise<User[]>;
-    getUser(options: { id?: number, email?: string }): Promise<User>;
-    createUser(data: UserCreateData): Promise<User>;
-    updateUser(id: number, data: User): Promise<User>;
+    listUsers(limit?: number): Promise<IUser[]>;
+    getUser(options: { id?: number, email?: string }): Promise<IUser>;
+    createUser(data: IUserCreateData): Promise<IUser>;
+    updateUser(id: number, data: Partial<IUserCreateData>): Promise<IUser>;
 }
 
 export interface TokensStorageI {

@@ -3,13 +3,15 @@ import {
   UniqueViolationError,
 } from "../../core/repositoryErrors.js";
 import TimeDuration from "../../core/timeDuration.js";
+import { getUserFullname } from "./models.js";
+import { IUser } from "./interfaces.js";
 import { serverUrl } from "../../server.js";
 import {
   TokensStorageI,
-  UserCreateData,
+  IUserCreateData,
   UsersStorageI,
 } from "./interfaces.js";
-import { Token, TokenScopes, User } from "./models.js";
+import { Token, TokenScopes } from "./models.js";
 
 export class UserAlreadyExistsError extends Error {
   constructor() {
@@ -51,17 +53,17 @@ export class UsersService {
     this.mailer = mailer;
   }
 
-  listUsers(limit?: number): Promise<User[]> {
+  listUsers(limit?: number): Promise<IUser[]> {
     return this.usersRepo.listUsers(limit);
   }
 
-  async signUp(userData: UserCreateData): Promise<User> {
+  async signUp(userData: IUserCreateData): Promise<IUser> {
     return this.hasher.hash(userData.password).then(async (hashedPassword) => {
       userData.password = hashedPassword;
       return this.usersRepo
         .createUser(userData)
         .then(async (user) => {
-          const { fullName, email, id } = user;
+          const { email, id } = user;
           if (!process.env.ACTIVATION_TOKEN_TTL) {
             throw new Error("ACTIVATION_TOKEN_TTL is not defined");
           }
@@ -74,7 +76,7 @@ export class UsersService {
           await this.mailer.sendMail(
             email,
             "Welcome to NodeJSCrud API!",
-            `Hello, ${fullName}! You have successfully signed up for NodeJSCrud API.
+            `Hello, ${getUserFullname(user)}! You have successfully signed up for NodeJSCrud API.
                         Follow the link below to activate your account: ${activationPage},
                         and enter the following token:
                         ${activationToken.plainText}`
@@ -121,16 +123,16 @@ export class UsersService {
       });
   }
 
-  async activateUser(plainToken: string): Promise<User> {
+  async activateUser(plainToken: string): Promise<IUser> {
     const hash = Token.hashFromPlainText(plainToken);
     return this.tokensRepo
       .getToken({ hash, scope: TokenScopes.ACTIVATION, withUser: true })
-      .then((token) => {
+      .then(async (token) => {
         if (token.isExpired()) {
           throw new ExpiredTokenError();
         }
         return this.usersRepo.getUser({ id: token.userId }).then((user) => {
-          const updatedUser = new User({ ...user, isActive: true });
+          const updatedUser = { ...user, isActive: true };
           return this.usersRepo.updateUser(user.id, updatedUser);
         })
       });

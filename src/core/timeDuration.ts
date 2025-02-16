@@ -16,7 +16,7 @@ export default class TimeDuration {
         while ((match = regex.exec(duration)) !== null) {
             const value = parseInt(match[1]);
             const unit = match[2];
-    
+
             switch (unit) {
                 case 'ms':
                     this.durationMs += value;

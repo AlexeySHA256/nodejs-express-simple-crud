@@ -1,31 +1,12 @@
-import { Post } from "../../posts/domain/models.js";
 import crypto_ from "crypto";
+import { IUser } from "./interfaces.js";
+
+export const getUserFullname = (user: IUser) => user.firstName + " " + user.lastName
 
 export enum UserRoles {
     USER = "USER",
     ADMIN = "ADMIN",
     DEV = "DEV"
-}
-
-export class User {
-    id!: number;
-    firstName!: string;
-    lastName!: string;
-    email!: string;
-    role: UserRoles = UserRoles.USER;
-    posts?: Post[];
-    isActive!: boolean;
-    passwordHash!: string;
-    createdAt!: Date;
-    updatedAt!: Date;
-
-    constructor(obj: { id: number, firstName: string, lastName: string, email: string, role: UserRoles, isActive: boolean, posts?: Post[], passwordHash: string, createdAt: Date, updatedAt: Date }) {
-        Object.assign(this, obj);
-    }
-
-    get fullName(): string {
-        return this.firstName + " " + this.lastName;
-    }
 }
 
 export enum TokenScopes {
@@ -39,9 +20,9 @@ export class Token {
     hash!: string;
     userId!: number;
     expiry!: Date;
-    user?: User;
+    user?: IUser;
 
-    constructor(obj: { scope: TokenScopes, plainText: string, hash: string, userId: number, expiry: Date, user?: User }) {
+    constructor(obj: { scope: TokenScopes, plainText: string, hash: string, userId: number, expiry: Date, user?: IUser }) {
         Object.assign(this, obj);
     }
 

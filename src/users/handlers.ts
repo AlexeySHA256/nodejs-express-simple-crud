@@ -2,15 +2,16 @@ import validator from "validator";
 import { ExpiredTokenError, InvalidCredentialsError, UserAlreadyExistsError, UsersService } from "./domain/service.js";
 import { Request, Response } from "express";
 import { ActivateUserForm, UserCreateForm, UserLoginForm } from "./forms.js";
-import { Token, User } from "./domain/models.js";
+import { IUser, IToken } from "./domain/interfaces.js";
+import { Token } from "./domain/models.js";
+
 
 interface UsersServiceI {
-    listUsers(limit: number): Promise<User[]>
-    signUp(firstName: string, lastName: string, email: string, password: string): Promise<User>
+    listUsers(limit: number): Promise<IUser[]>
+    signUp(firstName: string, lastName: string, email: string, password: string): Promise<IUser>
     signIn(email: string, password: string): Promise<Token>
-    activateUser(plainToken: string): Promise<User>
+    activateUser(plainToken: string): Promise<IUser>
 }
-
 export class UsersHandlers {
     signInGet = (req: Request, res: Response) => {
         const form = new UserLoginForm();
@@ -63,7 +64,7 @@ export class UsersApiHandlers {
                 if (err instanceof UserAlreadyExistsError) {
                     res.status(409).json({ error: err.message });
                     return
-                } 
+                }
                 res.status(500).json({ error: "Can't create user, please try again later" });
             });
     }
@@ -76,10 +77,12 @@ export class UsersApiHandlers {
         }
         this._service
             .signIn(req.body.email, req.body.password)
-            .then((token) => res.json({ success: true, token: {
-                text: token.plainText, 
-                expiry: token.expiry
-            } }))
+            .then((token) => res.json({
+                success: true, token: {
+                    text: token.plainText,
+                    expiry: token.expiry
+                }
+            }))
             .catch((err: Error) => {
                 if (err instanceof InvalidCredentialsError) {
                     res.status(401).json({ success: false, error: err.message });
@@ -103,7 +106,7 @@ export class UsersApiHandlers {
                 if (err instanceof ExpiredTokenError) {
                     res.status(400).json({ success: false, error: err.message });
                     return
-                } 
+                }
                 console.log('UsersHandlers.activateUser: ', err);
                 res.status(500).json({ success: false, error: "Can't activate user, please try again later" });
             });

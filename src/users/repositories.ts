@@ -4,30 +4,29 @@ import {
   prisma,
   UniqueViolationErrCode,
 } from "../db/prisma.js";
-import { Token, TokenScopes, User, UserRoles } from "./domain/models.js";
+import { Token, TokenScopes, UserRoles } from "./domain/models.js";
+import { IUser } from "./domain/interfaces.js";
 import {
   NotFoundError,
   UniqueViolationError,
 } from "../core/repositoryErrors.js";
-import { UserCreateData } from "./domain/interfaces.js";
+import { IUserCreateData } from "./domain/interfaces.js";
 
 export class UsersRepositoryImpl {
-  async listUsers(limit?: number): Promise<User[]> {
+  async listUsers(limit?: number): Promise<IUser[]> {
     return prisma.user
       .findMany({ take: limit })
-      .then((users) =>
-        users.map((user) => new User({ ...user, role: user.role as UserRoles }))
-      );
+      .then((users) => users);
   }
 
-  async getUser(filters: { id?: number; email?: string }): Promise<User> {
+  async getUser(filters: { id?: number; email?: string }): Promise<IUser> {
     if (!filters.id && !filters.email) {
       throw new Error("Either id or email must be provided");
     }
 
     return prisma.user
       .findUniqueOrThrow({ where: { id: filters.id, email: filters.email } })
-      .then((user) => new User({ ...user, role: user.role as UserRoles }))
+      .then((user) => ({ ...user, role: user.role as UserRoles }))
       .catch((err) => {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -39,10 +38,9 @@ export class UsersRepositoryImpl {
       });
   }
 
-  async createUser(data: UserCreateData): Promise<User> {
+  async createUser(data: IUserCreateData): Promise<IUser> {
     return prisma.user
       .create({ data: { ...data, passwordHash: data.password } })
-      .then((user) => new User({ ...user, role: user.role as UserRoles }))
       .catch((err) => {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -54,7 +52,7 @@ export class UsersRepositoryImpl {
       });
   }
 
-  async updateUser(id: number, data: User): Promise<User> {
+  async updateUser(id: number, data: IUser): Promise<IUser> {
     return prisma.user
       .update({
         where: { id },
@@ -67,7 +65,7 @@ export class UsersRepositoryImpl {
           role: data.role,
         },
       })
-      .then((user) => new User({ ...user, role: user.role as UserRoles }))
+      .then((user) => ({ ...user, role: user.role as UserRoles }))
       .catch((err) => {
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
           switch (err.code) {
@@ -136,9 +134,9 @@ export class TokensRepositoryImpl {
           new Token({
             ...token,
             scope: token.scope as TokenScopes,
-            user: new User({
+            user: ({
               ...token.user,
-              role: token.user.role as UserRoles,
+              role: token.user.role,
             }),
             plainText: "",
           })

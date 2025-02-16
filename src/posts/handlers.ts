@@ -1,17 +1,17 @@
-import { PostNotFoundError, CommentNotFoundError, postData, commentData } from "./domain/services.js";
+import { PostNotFoundError, CommentNotFoundError } from "./domain/services.js";
 import { CommentCreateForm, CommentUpdateForm, PostCreateForm, PostsListForm, PostUpdateForm } from "./forms.js";
 import validator from "validator";
 import { Request, Response } from "express";
-import { Post, Comment } from "./domain/models.js";
-import { User } from "../users/domain/models.js";
-import { PostsStorageI } from "./domain/interfaces.js";
+import { IUser } from "../users/domain/interfaces.js";
+import { ICommentCreateData, IPost, IPostCreateData, IPostExtended, PostsStorageI } from "./domain/interfaces.js";
 import { UsersStorageI } from "../users/domain/interfaces.js";
+import { IPaginatedData } from "../../types/types.js";
 
 interface PostsServiceI {
-  listPosts: (page_size: number, page_num: number) => Promise<{ page_size: number, page_num: number, posts: Post[], pages_range: number, first_page_num: number, last_page_num: number, total_records: number }>;
-  getPost: (id: number) => Promise<Post>;
-  createPost: (postData: postData) => Promise<Post>;
-  updatePost: (id: number, postData: Partial<postData>) => Promise<Post>;
+  listPosts: (page_size: number, page_num: number) => Promise<IPaginatedData<IPost>>;
+  getPost: (id: number) => Promise<IPostExtended>;
+  createPost: (postData: IPostCreateData) => Promise<IPost>;
+  updatePost: (id: number, postData: Partial<IPostCreateData>) => Promise<IPost>;
   deletePost: (id: number) => Promise<void>;
   postsRepo: PostsStorageI;
   usersRepo: UsersStorageI;
@@ -19,8 +19,8 @@ interface PostsServiceI {
 
 interface CommentsServiceI {
   getComment: (id: number) => Promise<Comment>;
-  createComment: (commentData: commentData) => Promise<Comment>;
-  updateComment: (id: number, commentData: Partial<commentData>) => Promise<Comment>;
+  createComment: (commentData: ICommentCreateData) => Promise<Comment>;
+  updateComment: (id: number, commentData: Partial<ICommentCreateData>) => Promise<Comment>;
   deleteComment: (id: number) => Promise<void>;
   listCommentsForPost: (postId: number) => Promise<Comment[]>
 }
@@ -39,7 +39,7 @@ export class PostsHandlers {
 
     req.query.page_num = req.query.page_num || "1";
     req.query.page_size = req.query.page_size || "10";
-    
+
     this.postsService
       .listPosts(+req.query.page_size, +req.query.page_num)
       .then((data) => res.render("posts/list", data))
@@ -63,12 +63,12 @@ export class PostsHandlers {
       });
   };
 
-  _makeCtxDataForUpdatePostGet = async (postID: number): Promise<{ post: Post; authors: User[]; form: PostUpdateForm }> => {
+  _makeCtxDataForUpdatePostGet = async (postID: number): Promise<{ post: IPost; authors: IUser[]; form: PostUpdateForm }> => {
     return this.postsService.postsRepo.getPost({ id: postID }).then(async (post) => {
       return this.postsService.usersRepo.listUsers(100).then((authors) => {
         const form = new PostUpdateForm(post);
         form.fields.forEach((field) => {
-          field.value = post[field.name as keyof Post];
+          field.value = post[field.name as keyof IPost];
         })
         return { post, authors, form };
       });
@@ -166,7 +166,7 @@ export class PostsApiHandlers {
       return
     }
     this.postsService
-      .createPost({ ...req.body, authorId: (res.locals.user as User).id })
+      .createPost({ ...req.body, authorId: (res.locals.user as IUser).id })
       .then((post) => res.status(201).json(post))
       .catch((e: Error) => res.status(500).json({ error: e }));
   };
@@ -178,7 +178,7 @@ export class PostsApiHandlers {
       return
     }
     this.commentsService
-      .createComment({ ...req.body, authorId:( res.locals.user as User).id })
+      .createComment({ ...req.body, authorId: (res.locals.user as IUser).id })
       .then((comment) => res.status(201).json({ comment }))
       .catch((e: Error) => {
         if (e instanceof PostNotFoundError) {
@@ -234,8 +234,8 @@ export class PostsApiHandlers {
       return
     }
     this.commentsService
-      .updateComment(+req.params.id, {...req.body })
-      .then((comment) => res.json({...comment }))
+      .updateComment(+req.params.id, { ...req.body })
+      .then((comment) => res.json({ ...comment }))
       .catch((e: Error) => {
         if (e instanceof CommentNotFoundError) {
           res.status(404).json({ error: e.message });

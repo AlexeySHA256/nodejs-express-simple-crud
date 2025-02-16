@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Handler, NextFunction, Request, Response } from "express";
 import {
   TokensRepositoryImpl,
   UsersRepositoryImpl,
 } from "../users/repositories.js";
-import { Token, TokenScopes, User, UserRoles } from "../users/domain/models.js";
+import { Token, TokenScopes, UserRoles } from "../users/domain/models.js";
 import { NotFoundError } from "./repositoryErrors.js";
 
 export enum unauthenticatedActions {
@@ -12,6 +12,31 @@ export enum unauthenticatedActions {
 }
 
 type middlewareFunc = (req: Request, res: Response, next: NextFunction) => void;
+
+export function requireAuthenticated(
+  actionOnFail: unauthenticatedActions = unauthenticatedActions.JSON_ERROR
+) {
+  function inner(handler: Handler, ctx: any): Handler {
+    function replacementMethod(
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ): void {
+      if (!res.locals.user) {
+        switch (actionOnFail) {
+          case unauthenticatedActions.REDIRECT_TO_LOGIN:
+            res.redirect("/users/signin");
+            break;
+          default:
+            res.status(401).json({ success: false, error: "Unauthorized" });
+        }
+      }
+      handler(req, res, next);
+    }
+    return replacementMethod;
+  }
+  return inner;
+}
 
 class Middlewares {
   private _tokensRepo: TokensRepositoryImpl;
@@ -104,7 +129,7 @@ class Middlewares {
     return (req: Request, res: Response, next: NextFunction) => {
       this.requireAuthenticated(unauthenticatedAction)(req, res, () => {
         const user = res.locals.user;
-        if (user && (user as User).role !== role) {
+        if (user && user.role !== role) {
           res.status(403).json({ success: false, error: "Forbidden" });
           return;
         }
